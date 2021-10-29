@@ -1,11 +1,12 @@
 /* istanbul ignore file */
 
-import { Card, Grid, makeStyles } from '@material-ui/core';
+import { Card, Slide, Grid, makeStyles, IconButton } from '@material-ui/core';
 import { Fleet, Level } from 'api-client';
 import Debug from 'debug';
 import React from 'react';
 import { DoorData, DoorPanel, LiftPanel, LiftPanelProps, WorkcellPanel } from 'react-components';
 import { GlobalHotKeys } from 'react-hotkeys';
+import CloseIcon from '@material-ui/icons/Close';
 import * as RmfModels from 'rmf-models';
 import { buildHotKeys } from '../../hotkeys';
 import { AppControllerContext } from '../app-contexts';
@@ -16,6 +17,7 @@ import {
   RmfIngressContext,
 } from '../rmf-app';
 import ScheduleVisualizer from '../schedule-visualizer';
+import SidePanelControl from './side-panel-control';
 
 const debug = Debug('Dashboard');
 const UpdateRate = 1000;
@@ -31,12 +33,16 @@ const useStyles = makeStyles((theme) => ({
   buildingPanel: {
     height: '100%',
   },
-  mapPanel: {
+  panels: {
     margin: theme.spacing(1),
     flex: '1 0 auto',
   },
   itemPanels: {
     width: 800,
+  },
+  closeButton: {
+    display: 'flex',
+    justifyContent: 'flex-end',
   },
 }));
 
@@ -49,6 +55,7 @@ export default function Dashboard(_props: {}): React.ReactElement {
   const sioClient = rmfIngress?.sioClient;
   const buildingMap = React.useContext(BuildingMapContext);
 
+  const [showOmniPanel, setShowOmniPanel] = React.useState(true);
   const [_triggerRender, setTriggerRender] = React.useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
   React.useEffect(() => {
     const interval = setInterval(() => setTriggerRender((prev) => prev + 1), UpdateRate);
@@ -192,7 +199,7 @@ export default function Dashboard(_props: {}): React.ReactElement {
       <GlobalHotKeys keyMap={hotKeysValue.keyMap} handlers={hotKeysValue.handlers}>
         {buildingMap && (
           <Grid container className={classes.buildingPanel} wrap="nowrap">
-            <Card variant="outlined" className={classes.mapPanel}>
+            <Card variant="outlined" className={classes.panels}>
               <ScheduleVisualizer
                 buildingMap={buildingMap}
                 dispensers={dispensers}
@@ -201,31 +208,42 @@ export default function Dashboard(_props: {}): React.ReactElement {
                 liftStates={Object.assign({}, liftStatesRef.current)}
                 fleetStates={Object.assign({}, fleetStatesRef.current)}
                 mode="normal"
-              ></ScheduleVisualizer>
+              >
+                <SidePanelControl show={!showOmniPanel} onShowOmniPanel={setShowOmniPanel} />
+              </ScheduleVisualizer>
             </Card>
-            <Grid item className={classes.itemPanels}>
-              {doors.length > 0 ? (
-                <DoorPanel
-                  doors={doors}
-                  doorStates={doorStatesRef.current}
-                  onDoorControlClick={handleOnDoorControlClick}
-                />
-              ) : null}
-              {lifts.length > 0 ? (
-                <LiftPanel
-                  lifts={lifts}
-                  liftStates={liftStatesRef.current}
-                  onRequestSubmit={handleLiftRequestSubmit}
-                />
-              ) : null}
-              {workcells.length > 0 ? (
-                <WorkcellPanel
-                  dispensers={dispensers}
-                  ingestors={ingestors}
-                  workCellStates={workcellStates}
-                />
-              ) : null}
-            </Grid>
+            <Slide direction="left" in={showOmniPanel} mountOnEnter unmountOnExit>
+              <Grid item className={classes.itemPanels}>
+                <Card variant="outlined" className={classes.panels}>
+                  <div className={classes.closeButton}>
+                    <IconButton onClick={() => setShowOmniPanel(false)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </div>
+                  {doors.length > 0 ? (
+                    <DoorPanel
+                      doors={doors}
+                      doorStates={doorStatesRef.current}
+                      onDoorControlClick={handleOnDoorControlClick}
+                    />
+                  ) : null}
+                  {lifts.length > 0 ? (
+                    <LiftPanel
+                      lifts={lifts}
+                      liftStates={liftStatesRef.current}
+                      onRequestSubmit={handleLiftRequestSubmit}
+                    />
+                  ) : null}
+                  {workcells.length > 0 ? (
+                    <WorkcellPanel
+                      dispensers={dispensers}
+                      ingestors={ingestors}
+                      workCellStates={workcellStates}
+                    />
+                  ) : null}
+                </Card>
+              </Grid>
+            </Slide>
           </Grid>
         )}
       </GlobalHotKeys>
