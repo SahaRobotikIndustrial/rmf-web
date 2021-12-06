@@ -16,7 +16,7 @@ import React from 'react';
 import clsx from 'clsx';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeGrid, GridChildComponentProps } from 'react-window';
-import { DoorMode as RmfDoorMode } from 'rmf-models';
+import { DoorMode as RmfDoorMode, Door as RmfDoor } from 'rmf-models';
 import { DoorTable } from './door-table';
 import { DoorData, doorModeToString, doorTypeToString } from './utils';
 
@@ -24,6 +24,7 @@ export interface DoorPanelProps {
   doors: DoorData[];
   doorStates: Record<string, DoorState>;
   onDoorControlClick?(event: React.MouseEvent, door: Door, mode: number): void;
+  onDoorClick?(door: RmfDoor): void;
 }
 
 interface DoorGridData extends DoorPanelProps {
@@ -38,6 +39,7 @@ export interface DoorcellProps {
   door: DoorData;
   doorMode?: number;
   onDoorControlClick?(event: React.MouseEvent, door: Door, mode: number): void;
+  onDoorClick?(door: RmfDoor): void;
 }
 
 const classes = {
@@ -130,7 +132,7 @@ const StyledCard = styled((props: CardProps) => <Card {...props} />)(({ theme })
 }));
 
 const DoorCell = React.memo(
-  ({ door, doorMode, onDoorControlClick }: DoorcellProps): JSX.Element => {
+  ({ door, doorMode, onDoorControlClick, onDoorClick }: DoorcellProps): JSX.Element => {
     const doorModeLabelClasses = React.useCallback((doorMode?: number): string => {
       if (doorMode === undefined) {
         return '';
@@ -150,7 +152,12 @@ const DoorCell = React.memo(
     const labelId = `door-cell-${door.door.name}`;
 
     return (
-      <Paper className={classes.cellPaper} role="region" aria-labelledby={labelId}>
+      <Paper
+        className={classes.cellPaper}
+        role="region"
+        aria-labelledby={labelId}
+        onClick={() => onDoorClick && onDoorClick(door.door)}
+      >
         <Typography
           noWrap
           id={labelId}
@@ -222,12 +229,18 @@ const DoorGridRenderer = ({ data, columnIndex, rowIndex, style }: DoorGridRender
         door={door}
         doorMode={doorState?.current_mode.value}
         onDoorControlClick={data.onDoorControlClick}
+        onDoorClick={data.onDoorClick}
       />
     </div>
   ) : null;
 };
 
-export function DoorPanel({ doors, doorStates, onDoorControlClick }: DoorPanelProps): JSX.Element {
+export function DoorPanel({
+  doors,
+  doorStates,
+  onDoorControlClick,
+  onDoorClick,
+}: DoorPanelProps): JSX.Element {
   const [isCellView, setIsCellView] = React.useState(true);
   const columnWidth = 250;
 
@@ -269,6 +282,7 @@ export function DoorPanel({ doors, doorStates, onDoorControlClick }: DoorPanelPr
                     doors,
                     doorStates,
                     onDoorControlClick,
+                    onDoorClick,
                   }}
                 >
                   {DoorGridRenderer}
@@ -281,6 +295,7 @@ export function DoorPanel({ doors, doorStates, onDoorControlClick }: DoorPanelPr
             doors={doors}
             doorStates={doorStates}
             onDoorControlClick={onDoorControlClick}
+            onDoorClick={onDoorClick}
           />
         )}
       </Grid>

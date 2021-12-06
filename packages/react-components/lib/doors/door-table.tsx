@@ -3,7 +3,7 @@ import type { Door, DoorState } from 'api-client';
 import clsx from 'clsx';
 import React from 'react';
 import AutoSizer, { AutoSizerProps } from 'react-virtualized-auto-sizer';
-import { DoorMode as RmfDoorMode } from 'rmf-models';
+import { DoorMode as RmfDoorMode, Door as RmfDoor } from 'rmf-models';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { DoorData, doorModeToString, doorTypeToString } from './utils';
 import { useFixedTableCellStylesClasses, ItemTableCell } from '../utils';
@@ -12,6 +12,7 @@ export interface DoorTableProps {
   doors: DoorData[];
   doorStates: Record<string, DoorState>;
   onDoorControlClick?(event: React.MouseEvent, door: Door, mode: number): void;
+  onDoorClick?(door: RmfDoor): void;
 }
 
 interface DoorListRendererProps extends ListChildComponentProps {
@@ -22,6 +23,7 @@ export interface DoorRowProps {
   door: DoorData;
   doorMode: number;
   onDoorControlClick?(event: React.MouseEvent, door: Door, mode: number): void;
+  onDoorClick?(door: RmfDoor): void;
 }
 
 const classes = {
@@ -63,7 +65,7 @@ const getOpMode = (doorMode?: number) => {
   return getState === 'N/A' ? 'Offline' : 'Online';
 };
 
-const DoorRow = React.memo(({ door, doorMode, onDoorControlClick }: DoorRowProps) => {
+const DoorRow = React.memo(({ door, doorMode, onDoorControlClick, onDoorClick }: DoorRowProps) => {
   const { fixedTableCell, fixedLastTableCell } = useFixedTableCellStylesClasses;
   const doorModeLabelClasses = React.useCallback((doorMode?: number): string => {
     if (doorMode === undefined) {
@@ -83,7 +85,12 @@ const DoorRow = React.memo(({ door, doorMode, onDoorControlClick }: DoorRowProps
   const doorStatusClass = doorModeLabelClasses(doorMode);
 
   return (
-    <TableRow arial-label={`${door.door.name}`} component="div" className={classes.tableRow}>
+    <TableRow
+      arial-label={`${door.door.name}`}
+      component="div"
+      className={classes.tableRow}
+      onClick={() => onDoorClick && onDoorClick(door.door)}
+    >
       <ItemTableCell
         component="div"
         variant="body"
@@ -163,6 +170,7 @@ const DoorListRenderer = ({ data, index, style }: DoorListRendererProps) => {
         doorMode={doorState?.current_mode.value}
         onDoorControlClick={data.onDoorControlClick}
         key={door.door.name}
+        onDoorClick={data.onDoorClick}
       />
     </div>
   );
@@ -172,6 +180,7 @@ export const DoorTable = ({
   doors,
   doorStates,
   onDoorControlClick,
+  onDoorClick,
 }: DoorTableProps): JSX.Element => {
   const { fixedTableCell, fixedLastTableCell } = useFixedTableCellStylesClasses;
   return (
@@ -236,6 +245,7 @@ export const DoorTable = ({
                   doorStates,
                   width,
                   onDoorControlClick,
+                  onDoorClick,
                 }}
               >
                 {DoorListRenderer}

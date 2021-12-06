@@ -4,8 +4,17 @@ import { Card, Grid, styled } from '@mui/material';
 import { Door, DoorState, Fleet, Level, Lift, LiftState } from 'api-client';
 import Debug from 'debug';
 import React from 'react';
-import { DoorData, DoorPanel, LiftPanel, LiftPanelProps, WorkcellPanel } from 'react-components';
+import {
+  DoorData,
+  DoorPanel,
+  LiftPanel,
+  LiftPanelProps,
+  WorkcellPanel,
+  getDoorCenter,
+} from 'react-components';
 import { GlobalHotKeys } from 'react-hotkeys';
+import { MapProps, Map } from 'react-leaflet';
+import * as RmfModels from 'rmf-models';
 import { buildHotKeys } from '../../hotkeys';
 import { AppControllerContext } from '../app-contexts';
 import {
@@ -56,6 +65,7 @@ export default function Dashboard(_props: {}): React.ReactElement {
   const rmfIngress = React.useContext(RmfIngressContext);
   const sioClient = rmfIngress?.sioClient;
   const buildingMap = React.useContext(BuildingMapContext);
+  const [leafletMap, setLeafletMap] = React.useState<Map<MapProps, L.Map>>();
 
   const [_triggerRender, setTriggerRender] = React.useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
   React.useEffect(() => {
@@ -136,6 +146,14 @@ export default function Dashboard(_props: {}): React.ReactElement {
     [liftsApi],
   );
 
+  const handleDoorClick = (door: RmfModels.Door) => {
+    const center = getDoorCenter(door);
+    leafletMap &&
+      leafletMap.leafletElement.setView([center[1], center[0]], 5.5, {
+        animate: true,
+      });
+  };
+
   const hotKeysValue = React.useMemo(
     () =>
       buildHotKeys({
@@ -158,6 +176,7 @@ export default function Dashboard(_props: {}): React.ReactElement {
                 liftStates={Object.assign({}, liftStatesRef.current)}
                 fleetStates={Object.assign({}, fleetStatesRef.current)}
                 mode="normal"
+                ref={(map: Map<MapProps, L.Map>) => setLeafletMap(map)}
               ></ScheduleVisualizer>
             </Card>
             <Grid item className={classes.itemPanels}>
@@ -166,6 +185,7 @@ export default function Dashboard(_props: {}): React.ReactElement {
                   doors={doors}
                   doorStates={doorStatesRef.current}
                   onDoorControlClick={handleOnDoorControlClick}
+                  onDoorClick={handleDoorClick}
                 />
               ) : null}
               {lifts.length > 0 ? (
