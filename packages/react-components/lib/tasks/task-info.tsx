@@ -1,11 +1,8 @@
-import { Divider, Typography, useTheme } from '@mui/material';
+import { Button, Divider, Typography, useTheme } from '@mui/material';
 import { styled } from '@mui/material';
-import { TreeItem, TreeView } from '@mui/lab';
 import type { TaskState } from 'api-client';
 import React from 'react';
 import { TaskTimeline } from './task-timeline';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { parseTaskDetail, getState } from './utils';
 
 const classes = {
@@ -96,9 +93,11 @@ function DeliveryTaskInfoProps({ task }: DeliveryTaskInfoProps) {
 
 export interface TaskInfoProps {
   task: TaskState;
+  showLogs: boolean;
+  onShowLogs?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function TaskInfo({ task }: TaskInfoProps): JSX.Element {
+export function TaskInfo({ task, showLogs, onShowLogs }: TaskInfoProps): JSX.Element {
   const theme = useTheme();
   const taskType = task.category;
   const detailInfo = (() => {
@@ -126,14 +125,15 @@ export function TaskInfo({ task }: TaskInfoProps): JSX.Element {
         <InfoValue>{getState(task)}</InfoValue>
       </InfoLine>
       {detailInfo}
-      <Typography variant="h6">Progress</Typography>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="h6">Progress</Typography>
+        <Button variant="contained" onClick={() => onShowLogs && onShowLogs(!showLogs)}>
+          {showLogs ? 'CLOSE LOGS' : 'SHOW LOGS'}
+        </Button>
+      </div>
       <div style={{ padding: '4px' }}>
         <TaskTimeline taskState={task} />
       </div>
-      <TreeView
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpandIcon={<ChevronRightIcon />}
-      ></TreeView>
     </StyledDiv>
   );
 }
