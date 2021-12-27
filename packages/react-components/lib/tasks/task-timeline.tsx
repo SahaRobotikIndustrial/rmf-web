@@ -11,10 +11,8 @@ import {
   TimelineSeparator,
   TimelineProps,
 } from '@mui/lab';
-import type { TaskSummary } from 'api-client';
+import { TaskState, Phase } from 'api-client';
 import React from 'react';
-import { TaskSummary as RmfTaskSummary } from 'rmf-models';
-import { rosTimeToJs } from '../utils';
 
 interface TimeLinePropsWithRef extends TimelineProps {
   ref?: React.RefObject<HTMLUListElement>;
@@ -56,63 +54,44 @@ const StyledTimeLine = styled((props: TimeLinePropsWithRef) => <Timeline {...pro
 );
 
 export interface TaskTimelineProps {
-  taskSummary: TaskSummary;
+  taskState: TaskState;
 }
 
-export function TaskTimeline({ taskSummary }: TaskTimelineProps): JSX.Element {
-  const timelinePhases = taskSummary.status.split('\n\n');
-  const currentDotIdx = timelinePhases.findIndex((msg: string) => msg.startsWith('*'));
-  const timelineInfo = taskSummary.status.split('\n\n');
+export function TaskTimeline({ taskState }: TaskTimelineProps): JSX.Element | null {
+  const timelinePhases = taskState.phases;
 
-  const timelineDotProps = timelinePhases.map((_: string, idx: number) => {
-    if ([RmfTaskSummary.STATE_CANCELED, RmfTaskSummary.STATE_FAILED].includes(taskSummary.state)) {
-      return {
-        className: classes.failedPhase,
-      };
+  function getTimeLineDotProps(taskState: TaskState, taskPhase: Phase) {
+    if (taskState.completed?.includes(taskPhase.id)) return { className: classes.completedPhase };
+    if (taskPhase.id === taskState.active) return { className: classes.completedPhase };
+    if (taskState.pending?.includes(taskPhase.id)) return { className: classes.completedPhase };
+    else {
+      return { className: classes.failedPhase };
     }
+  }
 
-    if (taskSummary.state === RmfTaskSummary.STATE_COMPLETED) {
-      return {
-        className: classes.completedPhase,
-      };
-    }
-
-    if (taskSummary.state === RmfTaskSummary.STATE_ACTIVE && idx < currentDotIdx) {
-      return {
-        className: classes.completedPhase,
-      };
-    }
-
-    return {
-      className: classes.pendingPhase,
-    };
-  });
-
-  return (
+  return timelinePhases ? (
     <StyledTimeLine position="left" className={classes.timelineRoot}>
-      {timelineInfo.map((dotInfo, idx) => {
+      {Object.keys(timelinePhases).map((phase: string, idx: number) => {
+        const estimatedTime = timelinePhases[phase].estimate_millis;
         return (
           <TimelineItem key={idx}>
             <TimelineOppositeContent style={{ flex: 0.1, padding: '0px 12px 0px 0px' }}>
               <Typography variant="overline" color="textSecondary" style={{ textAlign: 'justify' }}>
-                {idx === 0 && rosTimeToJs(taskSummary.start_time).toLocaleTimeString()}
-                {idx > 0 &&
-                  idx === timelineInfo.length - 1 &&
-                  rosTimeToJs(taskSummary.end_time).toLocaleTimeString()}
+                {estimatedTime ? new Date(estimatedTime * 1000).toISOString().slice(11, -1) : null}
               </Typography>
             </TimelineOppositeContent>
             <TimelineSeparator>
-              <TimelineDot {...timelineDotProps[idx]} />
-              {idx < timelineInfo.length - 1 && <TimelineConnector />}
+              <TimelineDot {...getTimeLineDotProps(taskState, timelinePhases[phase])} />
+              {idx < Object.keys(timelinePhases).length - 1 && <TimelineConnector />}
             </TimelineSeparator>
             <TimelineContent>
               <Paper className={classes.paper}>
-                <Typography variant="caption">{dotInfo}</Typography>
+                <Typography variant="caption">{timelinePhases[phase].detail}</Typography>
               </Paper>
             </TimelineContent>
           </TimelineItem>
         );
       })}
     </StyledTimeLine>
-  );
+  ) : null;
 }

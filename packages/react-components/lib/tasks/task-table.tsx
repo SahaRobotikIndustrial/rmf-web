@@ -7,7 +7,7 @@ import {
   TableProps,
   styled,
 } from '@mui/material';
-import type { TaskSummary, Time } from 'api-client';
+import type { TaskState, Time } from 'api-client';
 import clsx from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 import React from 'react';
@@ -83,34 +83,35 @@ const StyledTable = styled((props: TableProps) => <Table {...props} />)(({ theme
 }));
 
 interface TaskRowProps {
-  task: TaskSummary;
+  task: TaskState;
   onClick: React.MouseEventHandler<HTMLTableRowElement>;
 }
 
 function TaskRow({ task, onClick }: TaskRowProps) {
+  // replace all temp info
   const [hover, setHover] = React.useState(false);
 
-  const returnTaskStateCellClass = (task: TaskSummary) => {
-    switch (task.state) {
-      case RmfTaskSummary.STATE_ACTIVE:
-        return classes.taskActiveCell;
-      case RmfTaskSummary.STATE_CANCELED:
-        return classes.taskCancelledCell;
-      case RmfTaskSummary.STATE_COMPLETED:
-        return classes.taskCompletedCell;
-      case RmfTaskSummary.STATE_FAILED:
-        return classes.taskFailedCell;
-      case RmfTaskSummary.STATE_PENDING:
-        return classes.taskPendingCell;
-      case RmfTaskSummary.STATE_QUEUED:
-        return classes.taskQueuedCell;
-      default:
-        return classes.taskUnknownCell;
-    }
+  const returnTaskStateCellClass = (task: TaskState) => {
+    // switch (task.) {
+    //   case RmfTaskSummary.STATE_ACTIVE:
+    //     return classes.taskActiveCell;
+    //   case RmfTaskSummary.STATE_CANCELED:
+    //     return classes.taskCancelledCell;
+    //   case RmfTaskSummary.STATE_COMPLETED:
+    //     return classes.taskCompletedCell;
+    //   case RmfTaskSummary.STATE_FAILED:
+    //     return classes.taskFailedCell;
+    //   case RmfTaskSummary.STATE_PENDING:
+    //     return classes.taskPendingCell;
+    //   case RmfTaskSummary.STATE_QUEUED:
+    //     return classes.taskQueuedCell;
+    //   default:
+    return classes.taskUnknownCell;
+    // }
   };
 
   const taskStateCellClass = returnTaskStateCellClass(task);
-
+  // TODO - replace all temp info
   return (
     <>
       <TableRow
@@ -119,11 +120,11 @@ function TaskRow({ task, onClick }: TaskRowProps) {
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
       >
-        <TableCell>{task.task_id}</TableCell>
-        <TableCell>{task.robot_name}</TableCell>
-        <TableCell>{toRelativeDate(task.start_time)}</TableCell>
-        <TableCell>{toRelativeDate(task.end_time)}</TableCell>
-        <TableCell className={taskStateCellClass}>{taskStateToStr(task.state)}</TableCell>
+        <TableCell>{task.booking.id}</TableCell>
+        <TableCell>{'robotname'}</TableCell>
+        <TableCell>{'start time'}</TableCell>
+        <TableCell>{'end_time'}</TableCell>
+        <TableCell className={taskStateCellClass}>{'task state'}</TableCell>
       </TableRow>
     </>
   );
@@ -138,8 +139,8 @@ export interface TaskTableProps {
    * The current list of tasks to display, when pagination is enabled, this should only
    * contain the tasks for the current page.
    */
-  tasks: TaskSummary[];
-  onTaskClick?(ev: React.MouseEvent<HTMLDivElement>, task: TaskSummary): void;
+  tasks: TaskState[];
+  onTaskClick?(ev: React.MouseEvent<HTMLDivElement>, task: TaskState): void;
 }
 
 export function TaskTable({ tasks, onTaskClick }: TaskTableProps): JSX.Element {
@@ -162,7 +163,7 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps): JSX.Element {
       <TableBody>
         {tasks.map((task) => (
           <TaskRow
-            key={task.task_id}
+            key={task.booking.id}
             task={task}
             onClick={(ev) => onTaskClick && onTaskClick(ev, task)}
           />

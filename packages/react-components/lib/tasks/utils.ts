@@ -1,4 +1,5 @@
 import { TaskSummary as RmfTaskSummary, TaskType as RmfTaskType } from 'rmf-models';
+import type { TaskState } from 'api-client';
 
 export function taskStateToStr(state: number): string {
   switch (state) {
@@ -36,4 +37,33 @@ export function taskTypeToStr(taskType: number): string {
     default:
       return 'Unknown';
   }
+}
+
+function parsePhaseDetail(phases: TaskState['phases'], category?: string) {
+  if (phases) {
+    if (category === 'Loop') {
+      const startPhase = phases['1'];
+      const endPhase = phases['2'];
+      const from = startPhase.category?.split('[place:')[1].split(']')[0];
+      const to = endPhase.category?.split('[place:')[1].split(']')[0];
+      return { to, from };
+    }
+  }
+  return {};
+}
+
+export function parseTaskDetail(task: TaskState, category?: string) {
+  switch (category) {
+    case 'Loop':
+      return parsePhaseDetail(task.phases, category);
+    default:
+      return {};
+  }
+}
+
+export function getState(task: TaskState) {
+  // TODO - handle killed and cancelled states
+  if (task.phases && task.completed?.length === Object.keys(task.phases).length) return 'Completed';
+  if (task.active) return 'Underway';
+  return '';
 }

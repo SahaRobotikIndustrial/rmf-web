@@ -19,7 +19,7 @@ import {
   Autorenew as AutorenewIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { SubmitTask, Task, TaskSummary } from 'api-client';
+import { TaskState } from 'api-client';
 import React from 'react';
 import { CreateTaskForm, CreateTaskFormProps, TaskInfo, TaskTable } from 'react-components';
 import { UserProfileContext } from 'rmf-auth';
@@ -70,7 +70,7 @@ export interface TaskPanelProps
   /**
    * Should only contain the tasks of the current page.
    */
-  tasks: Task[];
+  tasks: TaskState[];
   paginationOptions?: Omit<React.ComponentPropsWithoutRef<typeof TablePagination>, 'component'>;
   cleaningZones?: string[];
   loopWaypoints?: string[];
@@ -78,7 +78,7 @@ export interface TaskPanelProps
   dispensers?: string[];
   ingestors?: string[];
   submitTasks?: CreateTaskFormProps['submitTasks'];
-  cancelTask?: (task: TaskSummary) => Promise<void>;
+  cancelTask?: (task: TaskState) => Promise<void>;
   onRefresh?: () => void;
   onAutoRefresh?: (enabled: boolean) => void;
 }
@@ -98,7 +98,7 @@ export function TaskPanel({
   ...divProps
 }: TaskPanelProps): JSX.Element {
   const theme = useTheme();
-  const [selectedTask, setSelectedTask] = React.useState<Task | undefined>(undefined);
+  const [selectedTask, setSelectedTask] = React.useState<TaskState | undefined>(undefined);
   const uploadFileInputRef = React.useRef<HTMLInputElement>(null);
   const [openCreateTaskForm, setOpenCreateTaskForm] = React.useState(false);
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -113,7 +113,7 @@ export function TaskPanel({
       return;
     }
     try {
-      await cancelTask(selectedTask.summary);
+      // await cancelTask(selectedTask.summary);
       setSnackbarMessage('Successfully cancelled task');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
@@ -125,14 +125,14 @@ export function TaskPanel({
     }
   }, [cancelTask, selectedTask]);
 
-  /* istanbul ignore next */
-  const tasksFromFile = (): Promise<SubmitTask[]> => {
+  // /* istanbul ignore next */
+  const tasksFromFile = (): Promise<TaskState[]> => {
     return new Promise((res) => {
       const fileInputEl = uploadFileInputRef.current;
       if (!fileInputEl) {
         return [];
       }
-      let taskFiles: SubmitTask[];
+      let taskFiles: TaskState[];
       const listener = async () => {
         try {
           if (!fileInputEl.files || fileInputEl.files.length === 0) {
@@ -161,10 +161,9 @@ export function TaskPanel({
   const taskCancellable =
     selectedTask &&
     profile &&
-    Enforcer.canCancelTask(profile, selectedTask) &&
-    (selectedTask.summary.state === RmfTaskSummary.STATE_ACTIVE ||
-      selectedTask.summary.state === RmfTaskSummary.STATE_PENDING ||
-      selectedTask.summary.state === RmfTaskSummary.STATE_QUEUED);
+    Enforcer.canCancelTask(profile) &&
+    (selectedTask.active || selectedTask.pending);
+    // selectedTask. === RmfTaskSummary.STATE_QUEUED
 
   return (
     <StyledDiv {...divProps}>
@@ -199,9 +198,9 @@ export function TaskPanel({
           </Toolbar>
           <TableContainer>
             <TaskTable
-              tasks={tasks.map((t) => t.summary)}
+              tasks={tasks.map((t) => t)}
               onTaskClick={(_ev, task) =>
-                setSelectedTask(tasks.find((t) => t.task_id === task.task_id))
+                setSelectedTask(tasks.find((t) => t.booking.id === task.booking.id))
               }
             />
           </TableContainer>
@@ -212,7 +211,7 @@ export function TaskPanel({
         <Paper className={classes.detailPanelContainer}>
           {selectedTask ? (
             <>
-              <TaskInfo task={selectedTask.summary} />
+              <TaskInfo task={selectedTask} />
               <Button
                 style={{ marginTop: theme.spacing(1) }}
                 fullWidth
