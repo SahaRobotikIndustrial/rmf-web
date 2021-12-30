@@ -1,9 +1,12 @@
 import { Divider, Typography, useTheme } from '@mui/material';
 import { styled } from '@mui/material';
+import { TreeItem, TreeView } from '@mui/lab';
 import type { TaskState } from 'api-client';
 import React from 'react';
 import { TaskTimeline } from './task-timeline';
-import { parseTaskDetail, getState } from './utils';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { parseTaskDetail, getState, getTreeViewHeader } from './utils';
 
 const classes = {
   infoValue: 'task-info-info-value',
@@ -124,7 +127,13 @@ export function TaskInfo({ task }: TaskInfoProps): JSX.Element {
       </InfoLine>
       {detailInfo}
       <Typography variant="h6">Progress</Typography>
-      <TaskTimeline taskState={task} />
+      <div style={{ padding: '4px' }}>
+        <TaskTimeline taskState={task} />
+      </div>
+      <TreeView
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpandIcon={<ChevronRightIcon />}
+      ></TreeView>
     </StyledDiv>
   );
 }

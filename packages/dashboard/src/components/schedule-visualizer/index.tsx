@@ -239,36 +239,36 @@ export default React.forwardRef(function ScheduleVisualizer(
     [places, currentLevel],
   );
 
-  React.useEffect(() => {
-    (async () => {
-      const promises = Object.values(fleetStates).flatMap((fleetState) =>
-        fleetState.robots.map(async (r) => {
-          const robotId = `${fleetState.name}/${r.name}`;
-          if (robotId in robotsStore) return;
-          robotsStore[robotId] = {
-            fleet: fleetState.name,
-            name: r.name,
-            model: r.model,
-            footprint: 0.5,
-            color: await colorManager.robotPrimaryColor(fleetState.name, r.name, r.model),
-            iconPath:
-              (await resourceManager?.robots.getIconPath(fleetState.name, r.model)) || undefined,
-          };
-        }),
-      );
-      await safeAsync(Promise.all(promises));
-      const newRobots = Object.values(fleetStates).flatMap((fleetState) =>
-        fleetState.robots
-          .filter(
-            (r) =>
-              r.location.level_name === currentLevel.name &&
-              `${fleetState.name}/${r.name}` in robotsStore,
-          )
-          .map((r) => robotsStore[`${fleetState.name}/${r.name}`]),
-      );
-      setRobots(newRobots);
-    })();
-  }, [safeAsync, fleetStates, robotsStore, resourceManager, currentLevel]);
+  // React.useEffect(() => {
+  //   (async () => {
+  //     const promises = Object.values(fleetStates).flatMap((fleetState) =>
+  //       fleetState.robots.map(async (r) => {
+  //         const robotId = `${fleetState.name}/${r.name}`;
+  //         if (robotId in robotsStore) return;
+  //         robotsStore[robotId] = {
+  //           fleet: fleetState.name,
+  //           name: r.name,
+  //           model: r.model,
+  //           footprint: 0.5,
+  //           color: await colorManager.robotPrimaryColor(fleetState.name, r.name, r.model),
+  //           iconPath:
+  //             (await resourceManager?.robots.getIconPath(fleetState.name, r.model)) || undefined,
+  //         };
+  //       }),
+  //     );
+  //     await safeAsync(Promise.all(promises));
+  //     const newRobots = Object.values(fleetStates).flatMap((fleetState) =>
+  //       fleetState.robots
+  //         .filter(
+  //           (r) =>
+  //             r.location.level_name === currentLevel.name &&
+  //             `${fleetState.name}/${r.name}` in robotsStore,
+  //         )
+  //         .map((r) => robotsStore[`${fleetState.name}/${r.name}`]),
+  //     );
+  //     setRobots(newRobots);
+  //   })();
+  // }, [safeAsync, fleetStates, robotsStore, resourceManager, currentLevel]);
 
   React.useEffect(() => {
     (async () => {
@@ -392,7 +392,7 @@ export default React.forwardRef(function ScheduleVisualizer(
           <TrajectoriesOverlay bounds={bounds} trajectoriesData={renderedTrajectories} />
         </LayersControl.Overlay>
 
-        <LayersControl.Overlay name="Robots" checked={!layersUnChecked['Robots']}>
+        {/* <LayersControl.Overlay name="Robots" checked={!layersUnChecked['Robots']}>
           <RobotsOverlay
             bounds={bounds}
             robots={robots}
@@ -403,7 +403,7 @@ export default React.forwardRef(function ScheduleVisualizer(
             hideLabels={layersUnChecked['Robots']}
             onRobotClick={onRobotClick}
           />
-        </LayersControl.Overlay>
+        </LayersControl.Overlay> */}
       </LayersControl>
 
       <TrajectoryTimeControl

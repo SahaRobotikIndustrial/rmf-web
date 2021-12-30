@@ -1,8 +1,7 @@
 /* istanbul ignore file */
-
 import { styled, GridProps, Grid, Card } from '@mui/material';
 import React from 'react';
-import { Fleet } from 'api-client';
+import { FleetState } from 'api-client';
 import { MapProps, Map } from 'react-leaflet';
 import { RobotPanel, VerboseRobot } from 'react-components';
 import {
@@ -62,7 +61,7 @@ export function RobotPage() {
   useIngestorStatesRef(sioClient, ingestors);
 
   // schedule visualizer fleet
-  const [fleets, setFleets] = React.useState<Fleet[]>([]);
+  const [fleets, setFleets] = React.useState<FleetState[]>([]);
   useFleets(rmfIngress, setFleets);
   const fleetStatesRef = useFleetStateRef(sioClient, fleets);
 
@@ -75,13 +74,13 @@ export function RobotPage() {
       setHasMore(false);
       return [];
     }
-    const resp = await rmfIngress.fleetsApi.getRobotsFleetsRobotsGet(
+    const resp = await rmfIngress.fleetsApi.queryFleetsFleetsGet(
       undefined,
       undefined,
-      11,
-      page * 10,
-      'fleet_name,robot_name',
+      undefined,
+      undefined,
     );
+    console.log(resp);
     const robots = resp.data as VerboseRobot[];
     setHasMore(robots.length > 10);
     const slicedRobots = robots.slice(0, 10);
@@ -101,37 +100,39 @@ export function RobotPage() {
   }, [fetchVerboseRobots]);
 
   return (
-    <StyledGrid container className={classes.container}>
-      <Grid item xs={4}>
-        <Card variant="outlined" className={classes.mapPanel}>
-          {buildingMap && (
-            <ScheduleVisualizer
-              buildingMap={buildingMap}
-              dispensers={dispensers}
-              ingestors={ingestors}
-              fleetStates={Object.assign({}, fleetStatesRef.current)}
-              mode="normal"
-              zoom={4.5}
-              ref={(map: Map<MapProps, L.Map>) => setLeafletMap(map)}
-            />
-          )}
-        </Card>
-      </Grid>
-      <Grid item xs={8}>
-        <RobotPanel
-          className={classes.robotPanel}
-          fetchVerboseRobots={fetchVerboseRobots}
-          paginationOptions={{
-            count: hasMore ? -1 : page * 10 + verboseRobots.length,
-            rowsPerPage: 10,
-            rowsPerPageOptions: [10],
-            page,
-            onPageChange: (_ev, newPage) => setPage(newPage),
-          }}
-          verboseRobots={verboseRobots}
-          onRobotZoom={onRobotZoom}
-        />
-      </Grid>
-    </StyledGrid>
+    <div>test</div>
+
+    // <StyledGrid container className={classes.container}>
+    //   <Grid item xs={4}>
+    //     <Card variant="outlined" className={classes.mapPanel}>
+    //       {buildingMap && (
+    //         <ScheduleVisualizer
+    //           buildingMap={buildingMap}
+    //           dispensers={dispensers}
+    //           ingestors={ingestors}
+    //           fleetStates={Object.assign({}, fleetStatesRef.current)}
+    //           mode="normal"
+    //           zoom={4.5}
+    //           ref={(map: Map<MapProps, L.Map>) => setLeafletMap(map)}
+    //         />
+    //       )}
+    //     </Card>
+    //   </Grid>
+    //   <Grid item xs={8}>
+    //     <RobotPanel
+    //       className={classes.robotPanel}
+    //       fetchVerboseRobots={fetchVerboseRobots}
+    //       paginationOptions={{
+    //         count: hasMore ? -1 : page * 10 + verboseRobots.length,
+    //         rowsPerPage: 10,
+    //         rowsPerPageOptions: [10],
+    //         page,
+    //         onPageChange: (_ev, newPage) => setPage(newPage),
+    //       }}
+    //       verboseRobots={verboseRobots}
+    //       onRobotZoom={onRobotZoom}
+    //     />
+    //   </Grid>
+    // </StyledGrid>
   );
 }

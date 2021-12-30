@@ -10,9 +10,15 @@ import {
   TimelineOppositeContent,
   TimelineSeparator,
   TimelineProps,
+  TreeView,
+  TreeItem,
 } from '@mui/lab';
 import { TaskState, Phase } from 'api-client';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import React from 'react';
+import { getTreeViewHeader } from './utils';
+import { format } from 'date-fns';
 
 interface TimeLinePropsWithRef extends TimelineProps {
   ref?: React.RefObject<HTMLUListElement>;
@@ -29,7 +35,8 @@ const classes = {
 const StyledTimeLine = styled((props: TimeLinePropsWithRef) => <Timeline {...props} />)(
   ({ theme }) => ({
     [`& .${classes.paper}`]: {
-      padding: '6px 16px',
+      padding: theme.spacing(1),
+      marginTop: theme.spacing(1),
       width: '200px',
       maxHeight: '100px',
       overflow: 'auto',
@@ -53,45 +60,81 @@ const StyledTimeLine = styled((props: TimeLinePropsWithRef) => <Timeline {...pro
   }),
 );
 
+interface LoopTaskTreeProps {
+  task: TaskState;
+}
+
+function LoopTaskTree({ task }: LoopTaskTreeProps) {
+  const timelinePhases = task.phases;
+  let totalTimeTaken = 0;
+  timelinePhases &&
+    Object.keys(timelinePhases).forEach((p) => {
+      const estimateMillis = timelinePhases[p].estimate_millis;
+      if (estimateMillis) totalTimeTaken += estimateMillis * 1000;
+    });
+  function getTimeLineDotProps(taskState: TaskState) {
+    if (taskState.active) return { className: classes.completedPhase };
+    else {
+      return { className: classes.failedPhase };
+    }
+  }
+  return timelinePhases ? (
+    <TimelineItem key={'Loop'}>
+      <TimelineOppositeContent style={{ flex: 1, padding: '2px 2px' }}>
+        <Typography variant="overline" color="textSecondary" style={{ textAlign: 'justify' }}>
+          {format(new Date(), "hh:mm aaaaa'm'")}
+        </Typography>
+      </TimelineOppositeContent>
+      <TimelineSeparator>
+        <TimelineDot {...getTimeLineDotProps(task)} />
+        <TimelineConnector />
+      </TimelineSeparator>
+      <TimelineContent>
+        <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+          <TreeItem nodeId="node1" label={getTreeViewHeader(task.category)}>
+            <TreeItem
+              nodeId="node2"
+              label={Object.keys(timelinePhases).map((phase, idx) => {
+                return (
+                  <Paper className={classes.paper} key={idx}>
+                    <Typography variant="caption">{timelinePhases[phase].detail}</Typography>
+                  </Paper>
+                );
+              })}
+            />
+          </TreeItem>
+        </TreeView>
+      </TimelineContent>
+    </TimelineItem>
+  ) : null;
+}
+
 export interface TaskTimelineProps {
   taskState: TaskState;
 }
 
 export function TaskTimeline({ taskState }: TaskTimelineProps): JSX.Element | null {
-  const timelinePhases = taskState.phases;
-
-  function getTimeLineDotProps(taskState: TaskState, taskPhase: Phase) {
-    if (taskState.completed?.includes(taskPhase.id)) return { className: classes.completedPhase };
-    if (taskPhase.id === taskState.active) return { className: classes.completedPhase };
-    if (taskState.pending?.includes(taskPhase.id)) return { className: classes.completedPhase };
-    else {
-      return { className: classes.failedPhase };
+  // TODO - leaving here for reference for other treeviews
+  // function getTimeLineDotProps(taskState: TaskState, taskPhase: Phase) {
+  //   if (taskState.completed?.includes(taskPhase.id)) return { className: classes.completedPhase };
+  //   if (taskPhase.id === taskState.active) return { className: classes.completedPhase };
+  //   if (taskState.pending?.includes(taskPhase.id)) return { className: classes.completedPhase };
+  //   else {
+  //     return { className: classes.failedPhase };
+  //   }
+  // }
+  function GetTreeView(category: string) {
+    switch (category) {
+      case 'Loop':
+        return <LoopTaskTree task={taskState} />;
+      default:
+        return undefined;
     }
   }
 
-  return timelinePhases ? (
-    <StyledTimeLine position="left" className={classes.timelineRoot}>
-      {Object.keys(timelinePhases).map((phase: string, idx: number) => {
-        const estimatedTime = timelinePhases[phase].estimate_millis;
-        return (
-          <TimelineItem key={idx}>
-            <TimelineOppositeContent style={{ flex: 0.1, padding: '0px 12px 0px 0px' }}>
-              <Typography variant="overline" color="textSecondary" style={{ textAlign: 'justify' }}>
-                {estimatedTime ? new Date(estimatedTime * 1000).toISOString().slice(11, -1) : null}
-              </Typography>
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot {...getTimeLineDotProps(taskState, timelinePhases[phase])} />
-              {idx < Object.keys(timelinePhases).length - 1 && <TimelineConnector />}
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper className={classes.paper}>
-                <Typography variant="caption">{timelinePhases[phase].detail}</Typography>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-        );
-      })}
+  return (
+    <StyledTimeLine className={classes.timelineRoot}>
+      {taskState.category ? GetTreeView(taskState.category) : null}
     </StyledTimeLine>
-  ) : null;
+  );
 }

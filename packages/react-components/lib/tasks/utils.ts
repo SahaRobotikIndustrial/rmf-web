@@ -67,3 +67,18 @@ export function getState(task: TaskState) {
   if (task.active) return 'Underway';
   return '';
 }
+
+export function getTreeViewHeader(category: TaskState['category']) {
+  switch (category) {
+    case 'Loop':
+      return 'Loop Sequence';
+    case 'Clean':
+      return 'Clean Sequence';
+    case 'Delivery':
+    // TODO - not sure about return structure,
+    // once able to receive delivery task
+    // come back again.
+    default:
+      return '';
+  }
+}

@@ -77,6 +77,21 @@ export function TaskPage() {
     handleRefresh();
   }, [handleRefresh]);
 
+  React.useEffect(() => {
+    (async () => {
+      console.log('test logs');
+      if (fetchedTasks) {
+        const taskIds = fetchedTasks.map((t) => {
+          return t.booking.id;
+        });
+        const logs = await Promise.all(
+          taskIds.map((id) => tasksApi?.getTaskLogTasksTaskIdLogGet(id)),
+        );
+        console.log(logs);
+      }
+    })();
+  }, []);
+
   const submitTasks = React.useCallback<Required<TaskPanelProps>['submitTasks']>(
     async (tasks) => {
       if (!tasksApi) {
@@ -107,6 +122,7 @@ export function TaskPage() {
     },
     [tasksApi],
   );
+
   //extra task panel will be removed
   return (
     <StyledTaskPage
