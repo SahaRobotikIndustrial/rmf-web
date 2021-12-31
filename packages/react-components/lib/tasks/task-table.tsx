@@ -11,9 +11,7 @@ import type { TaskState, Time } from 'api-client';
 import clsx from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 import React from 'react';
-import { TaskSummary as RmfTaskSummary } from 'rmf-models';
 import { rosTimeToJs } from '../utils';
-import { taskStateToStr } from './utils';
 
 const classes = {
   table: 'task-table-table-root',

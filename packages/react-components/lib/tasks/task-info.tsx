@@ -6,7 +6,7 @@ import React from 'react';
 import { TaskTimeline } from './task-timeline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { parseTaskDetail, getState, getTreeViewHeader } from './utils';
+import { parseTaskDetail, getState } from './utils';
 
 const classes = {
   infoValue: 'task-info-info-value',
@@ -84,11 +84,11 @@ function DeliveryTaskInfoProps({ task }: DeliveryTaskInfoProps) {
       </InfoLine>
       <InfoLine>
         <span>Dropoff Location:</span>
-        <span style={{ float: 'right' }}>{'temp'}</span>
+        <span style={{ float: 'right' }}>{parseTaskDetail(task, task?.category).from}</span>
       </InfoLine>
       <InfoLine>
         <span>Dropoff Ingestor:</span>
-        <span style={{ float: 'right' }}>{'temp'}</span>
+        <span style={{ float: 'right' }}>{parseTaskDetail(task, task?.category).to}</span>
       </InfoLine>
     </>
   );

@@ -13,7 +13,7 @@ import {
   TreeView,
   TreeItem,
 } from '@mui/lab';
-import { TaskState, Phase } from 'api-client';
+import { TaskState } from 'api-client';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import React from 'react';
@@ -60,18 +60,19 @@ const StyledTimeLine = styled((props: TimeLinePropsWithRef) => <Timeline {...pro
   }),
 );
 
-interface LoopTaskTreeProps {
+interface TaskTreeProps {
   task: TaskState;
 }
 
-function LoopTaskTree({ task }: LoopTaskTreeProps) {
+function LoopTaskTree({ task }: TaskTreeProps) {
   const timelinePhases = task.phases;
-  let totalTimeTaken = 0;
-  timelinePhases &&
-    Object.keys(timelinePhases).forEach((p) => {
-      const estimateMillis = timelinePhases[p].estimate_millis;
-      if (estimateMillis) totalTimeTaken += estimateMillis * 1000;
-    });
+  // TODO - remove if a timeline for estimated fisnishing time is not needed
+  // let totalTimeTaken = 0;
+  // timelinePhases &&
+  //   Object.keys(timelinePhases).forEach((p) => {
+  //     const estimateMillis = timelinePhases[p].estimate_millis;
+  //     if (estimateMillis) totalTimeTaken += estimateMillis * 1000;
+  //   });
   function getTimeLineDotProps(taskState: TaskState) {
     if (taskState.active) return { className: classes.completedPhase };
     else {
@@ -109,11 +110,35 @@ function LoopTaskTree({ task }: LoopTaskTreeProps) {
   ) : null;
 }
 
+function DeliveryTaskTree({ task }: TaskTreeProps) {
+  // TODO - get timeline dot props, get ingestor and dispenser information?
+  return (
+    <TimelineItem key={'Delivery'}>
+      <TimelineOppositeContent style={{ flex: 1, padding: '2px 2px' }}>
+        <Typography variant="overline" color="textSecondary" style={{ textAlign: 'justify' }}>
+          {format(new Date(), "hh:mm aaaaa'm'")}
+        </Typography>
+      </TimelineOppositeContent>
+      <TimelineSeparator>
+        <TimelineDot />
+        <TimelineConnector />
+      </TimelineSeparator>
+      <TimelineContent>
+        <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+          <TreeItem nodeId="node1" label={getTreeViewHeader(task.category)}>
+            <TreeItem nodeId="node2" label={task.category} />
+          </TreeItem>
+        </TreeView>
+      </TimelineContent>
+    </TimelineItem>
+  );
+}
+
 export interface TaskTimelineProps {
   taskState: TaskState;
 }
 
-export function TaskTimeline({ taskState }: TaskTimelineProps): JSX.Element | null {
+export function TaskTimeline({ taskState }: TaskTimelineProps): JSX.Element {
   // TODO - leaving here for reference for other treeviews
   // function getTimeLineDotProps(taskState: TaskState, taskPhase: Phase) {
   //   if (taskState.completed?.includes(taskPhase.id)) return { className: classes.completedPhase };
@@ -124,12 +149,8 @@ export function TaskTimeline({ taskState }: TaskTimelineProps): JSX.Element | nu
   //   }
   // }
   function GetTreeView(category: string) {
-    switch (category) {
-      case 'Loop':
-        return <LoopTaskTree task={taskState} />;
-      default:
-        return undefined;
-    }
+    if (category.includes('Loop')) return <LoopTaskTree task={taskState} />;
+    if (category.includes('Delivery')) return <DeliveryTaskTree task={taskState} />;
   }
 
   return (
