@@ -100,39 +100,37 @@ export function RobotPage() {
   }, [fetchVerboseRobots]);
 
   return (
-    <div>test</div>
-
-    // <StyledGrid container className={classes.container}>
-    //   <Grid item xs={4}>
-    //     <Card variant="outlined" className={classes.mapPanel}>
-    //       {buildingMap && (
-    //         <ScheduleVisualizer
-    //           buildingMap={buildingMap}
-    //           dispensers={dispensers}
-    //           ingestors={ingestors}
-    //           fleetStates={Object.assign({}, fleetStatesRef.current)}
-    //           mode="normal"
-    //           zoom={4.5}
-    //           ref={(map: Map<MapProps, L.Map>) => setLeafletMap(map)}
-    //         />
-    //       )}
-    //     </Card>
-    //   </Grid>
-    //   <Grid item xs={8}>
-    //     <RobotPanel
-    //       className={classes.robotPanel}
-    //       fetchVerboseRobots={fetchVerboseRobots}
-    //       paginationOptions={{
-    //         count: hasMore ? -1 : page * 10 + verboseRobots.length,
-    //         rowsPerPage: 10,
-    //         rowsPerPageOptions: [10],
-    //         page,
-    //         onPageChange: (_ev, newPage) => setPage(newPage),
-    //       }}
-    //       verboseRobots={verboseRobots}
-    //       onRobotZoom={onRobotZoom}
-    //     />
-    //   </Grid>
-    // </StyledGrid>
+    <StyledGrid container className={classes.container}>
+      <Grid item xs={4}>
+        <Card variant="outlined" className={classes.mapPanel}>
+          {buildingMap && (
+            <ScheduleVisualizer
+              buildingMap={buildingMap}
+              dispensers={dispensers}
+              ingestors={ingestors}
+              fleetStates={Object.assign({}, fleetStatesRef.current)}
+              mode="normal"
+              zoom={4.5}
+              ref={(map: Map<MapProps, L.Map>) => setLeafletMap(map)}
+            />
+          )}
+        </Card>
+      </Grid>
+      <Grid item xs={8}>
+        <RobotPanel
+          className={classes.robotPanel}
+          fetchVerboseRobots={fetchVerboseRobots}
+          paginationOptions={{
+            count: hasMore ? -1 : page * 10 + verboseRobots.length,
+            rowsPerPage: 10,
+            rowsPerPageOptions: [10],
+            page,
+            onPageChange: (_ev, newPage) => setPage(newPage),
+          }}
+          verboseRobots={verboseRobots}
+          onRobotZoom={onRobotZoom}
+        />
+      </Grid>
+    </StyledGrid>
   );
 }
