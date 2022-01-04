@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 import { styled, GridProps, Grid, Card } from '@mui/material';
 import React from 'react';
-import { FleetState } from 'api-client';
+import { FleetState, RobotState } from 'api-client';
 import { MapProps, Map } from 'react-leaflet';
 import { RobotPanel, VerboseRobot } from 'react-components';
 import {
@@ -44,6 +44,7 @@ const StyledGrid = styled((props: GridProps) => <Grid {...props} />)(({ theme })
 export function RobotPage() {
   const rmfIngress = React.useContext(RmfIngressContext);
   const sioClient = React.useContext(RmfIngressContext)?.sioClient;
+  const taskApi = rmfIngress?.tasksApi;
   const buildingMap = React.useContext(BuildingMapContext);
   const [leafletMap, setLeafletMap] = React.useState<Map<MapProps, L.Map>>();
 
@@ -68,7 +69,7 @@ export function RobotPage() {
   // robot panel stuff
   const [hasMore, setHasMore] = React.useState(true);
   const [page, setPage] = React.useState(0);
-  const [verboseRobots, setVerboseRobots] = React.useState<VerboseRobot[]>([]);
+  const [verboseRobots, setVerboseRobots] = React.useState<RobotState[]>([]);
   const fetchVerboseRobots = React.useCallback(async () => {
     if (!rmfIngress) {
       setHasMore(false);
@@ -80,13 +81,25 @@ export function RobotPage() {
       undefined,
       undefined,
     );
-    console.log(resp);
-    const robots = resp.data as VerboseRobot[];
-    setHasMore(robots.length > 10);
-    const slicedRobots = robots.slice(0, 10);
-    setVerboseRobots(slicedRobots);
-    return slicedRobots;
+    let robotState: RobotState[] = [];
+    resp.data?.forEach((fleet) => {
+      const robotKey = fleet.robots && Object.keys(fleet.robots);
+      robotKey?.forEach((key) => {
+        fleet.robots && robotState.push(fleet.robots[key]);
+      });
+    });
+    setVerboseRobots(robotState);
+    return resp.data;
   }, [rmfIngress, page]);
+
+  const fetchSelectedTask = React.useCallback(
+    async (taskId: string) => {
+      if (!taskApi) return;
+      const resp = await taskApi.getTaskStateTasksTaskIdStateGet(taskId);
+      return resp.data;
+    },
+    [taskApi],
+  );
 
   const onRobotZoom = (robot: VerboseRobot) => {
     leafletMap &&
@@ -120,6 +133,7 @@ export function RobotPage() {
         <RobotPanel
           className={classes.robotPanel}
           fetchVerboseRobots={fetchVerboseRobots}
+          fetchSelectedTask={fetchSelectedTask}
           paginationOptions={{
             count: hasMore ? -1 : page * 10 + verboseRobots.length,
             rowsPerPage: 10,

@@ -1,22 +1,13 @@
 import { TaskSummary as RmfTaskSummary, TaskType as RmfTaskType } from 'rmf-models';
 import type { TaskState } from 'api-client';
 
-export function taskStateToStr(state: number): string {
-  switch (state) {
-    case RmfTaskSummary.STATE_ACTIVE:
-      return 'Active';
-    case RmfTaskSummary.STATE_CANCELED:
-      return 'Cancelled';
-    case RmfTaskSummary.STATE_COMPLETED:
-      return 'Completed';
-    case RmfTaskSummary.STATE_FAILED:
-      return 'Failed';
-    case RmfTaskSummary.STATE_PENDING:
-      return 'Pending';
-    case RmfTaskSummary.STATE_QUEUED:
-      return 'Queued';
-    default:
-      return 'Unknown';
+export function taskStateToStr(taskState: TaskState): string {
+  if (taskState.active) return 'active';
+  if (taskState.cancellation) return 'cancelled';
+  if (taskState.killed) return 'killed';
+  if (taskState.pending?.length === 0) return 'completed';
+  else {
+    return 'unknown';
   }
 }
 
