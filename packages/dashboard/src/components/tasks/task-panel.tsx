@@ -19,7 +19,7 @@ import {
   Autorenew as AutorenewIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { TaskState } from 'api-client';
+import { TaskState, TaskEventLog } from 'api-client';
 import React from 'react';
 import { CreateTaskForm, CreateTaskFormProps, TaskInfo, TaskTable } from 'react-components';
 import { UserProfileContext } from 'rmf-auth';
@@ -27,6 +27,7 @@ import { AppControllerContext } from '../app-contexts';
 import { Enforcer } from '../permissions';
 import { parseTasksFile } from './utils';
 import { TaskLogs } from './task-logs';
+import { RmfIngressContext } from '../rmf-app';
 
 const prefix = 'task-panel';
 const classes = {
@@ -106,8 +107,10 @@ export function TaskPanel({
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertProps['severity']>('success');
   const [autoRefresh, setAutoRefresh] = React.useState(true);
   const [showLogs, setShowLogs] = React.useState(false);
+  const [selectedTaskLog, setSelectedTaskLog] = React.useState<TaskEventLog | undefined>(undefined);
   const profile = React.useContext(UserProfileContext);
   const { showErrorAlert } = React.useContext(AppControllerContext);
+  const { tasksApi } = React.useContext(RmfIngressContext) || {};
 
   const handleCancelTaskClick = React.useCallback<React.MouseEventHandler>(async () => {
     if (!cancelTask || !selectedTask) {
@@ -156,6 +159,20 @@ export function TaskPanel({
       fileInputEl.click();
     });
   };
+
+  const fetchLogs = React.useCallback(async () => {
+    if (!tasksApi) {
+      return [];
+    }
+    if (selectedTask) {
+      const logs = await tasksApi.getTaskLogTasksTaskIdLogGet(selectedTask.booking.id);
+      setSelectedTaskLog(logs.data);
+    }
+  }, [tasksApi, selectedTask]);
+
+  React.useEffect(() => {
+    fetchLogs();
+  }, [selectedTask, fetchLogs]);
 
   const autoRefreshTooltipPrefix = autoRefresh ? 'Disable' : 'Enable';
 
@@ -229,7 +246,7 @@ export function TaskPanel({
             <NoSelectedTask />
           )}
         </Paper>
-        {showLogs ? <TaskLogs /> : null}
+        {showLogs && selectedTaskLog ? <TaskLogs taskLog={selectedTaskLog} /> : null}
       </Grid>
       {openCreateTaskForm && (
         <CreateTaskForm

@@ -1,11 +1,18 @@
 import React from 'react';
 import { Divider, Grid, Paper, PaperProps, styled, Typography, useTheme } from '@mui/material';
 import { format } from 'date-fns';
+import { TaskEventLog, TaskState } from 'api-client';
 
 const prefix = 'task-logs';
 const classes = {
   root: `${prefix}-root`,
 };
+
+interface TaskLogProps {
+  taskLog: TaskEventLog;
+  fetchTaskLogs?: () => Promise<never[] | undefined>;
+}
+
 const StyledPaper = styled((props: PaperProps) => <Paper variant="outlined" {...props} />)(
   ({ theme }) => ({
     [`&.${classes.root}`]: {
@@ -17,83 +24,46 @@ const StyledPaper = styled((props: PaperProps) => <Paper variant="outlined" {...
   }),
 );
 
-export function TaskLogs() {
+export function TaskLogs(props: TaskLogProps) {
+  const { taskLog } = props;
   const theme = useTheme();
-  const mockLogs = [
-    {
-      event: 'Pick Up',
-      phases: [
-        {
-          phaseName: 'Go To Kitchen',
-          logs: [
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 1' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 2' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 3' },
-          ],
-        },
-        {
-          phaseName: 'Wait for Kitchen Door to Open',
-          logs: [
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 1' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 2' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 3' },
-          ],
-        },
-        {
-          phaseName: 'Pass through Kitchen Door',
-          logs: [
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 1' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 2' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 3' },
-          ],
-        },
-        {
-          phaseName: 'Receive Items',
-          logs: [
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 1' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 2' },
-            { date: format(new Date(), 'MM/dd/yyyy HH:mm'), msg: 'message 3' },
-          ],
-        },
-      ],
-    },
-  ];
+  const phaseIds = taskLog.phases ? Object.keys(taskLog.phases) : [];
   return (
     <StyledPaper className={classes.root}>
       <Typography variant="h6" style={{ textAlign: 'center' }} gutterBottom>
-        Temp Task Logs
+        {taskLog.task_id}
       </Typography>
       <Divider />
-      {mockLogs.map((log, i) => {
+      {phaseIds.map((id: string) => {
+        const getEventObj: any = taskLog.phases ? taskLog.phases[id] : null;
+        const events = getEventObj ? getEventObj['events'] : {};
+        const eventIds = events ? Object.keys(events) : [];
         return (
-          <div style={{ marginTop: theme.spacing(1) }}>
-            <Typography variant="body1">{`${i + 1}. ${log.event}`}</Typography>
-            <Paper sx={{ padding: theme.spacing(1) }}>
-              {log.phases.map((l) => {
+          <Paper sx={{ padding: theme.spacing(1) }} key={`Phase - ${id}`}>
+            <Typography variant="body1" fontWeight="bold">
+              {`Phase - ${id}`}
+            </Typography>
+            {eventIds.map((idx) => {
+              const event = events[idx];
+              return event.map((e: any, i: any) => {
                 return (
-                  <div style={{ marginTop: theme.spacing(1) }}>
-                    <Typography variant="body1" fontWeight="bold">
-                      {l.phaseName}
-                    </Typography>
+                  <div style={{ marginTop: theme.spacing(1) }} key={`event - ${idx}`}>
+                    <Typography variant="body1">{`${i + 1}. Event - ${idx}`}</Typography>
                     <Grid container spacing={1}>
-                      {l.logs.map((msg) => {
-                        return (
-                          <>
-                            <Grid item xs={4}>
-                              <Typography variant="body1">{msg.date}</Typography>
-                            </Grid>
-                            <Grid item xs={8}>
-                              <Typography variant="body1">{msg.msg}</Typography>
-                            </Grid>
-                          </>
-                        );
-                      })}
+                      <Grid item xs={4}>
+                        <Typography variant="body1">
+                          {format(new Date(e.unix_millis_time * 1000), "hh:mm aaaaa'm'")}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant="body1">{e.text}</Typography>
+                      </Grid>
                     </Grid>
                   </div>
                 );
-              })}
-            </Paper>
-          </div>
+              });
+            })}
+          </Paper>
         );
       })}
     </StyledPaper>

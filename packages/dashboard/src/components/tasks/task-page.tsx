@@ -54,23 +54,6 @@ export function TaskPage() {
     [tasksApi],
   );
 
-  const fetchLogs = React.useCallback(async () => {
-    if (!tasksApi) {
-      return [];
-    }
-    console.log('test logs');
-    if (tasks) {
-      const taskIds = tasks.map((t) => {
-        return t.booking.id;
-      });
-      console.log(taskIds);
-      const logs = await Promise.all(
-        taskIds.map((id) => tasksApi?.getTaskLogTasksTaskIdLogGet(id)),
-      );
-      console.log(logs);
-    }
-  }, [tasksApi, tasks]);
-
   // React.useEffect(() => {
   //   if (!autoRefreshEnabled || !sioClient) return;
   //   const subs = fetchedTasks.map((t) =>
@@ -88,8 +71,7 @@ export function TaskPage() {
 
   const handleRefresh = React.useCallback<Required<TaskPanelProps>['onRefresh']>(async () => {
     fetchTasks(page);
-    fetchLogs();
-  }, [fetchTasks, fetchLogs, page]);
+  }, [fetchTasks, page]);
 
   React.useEffect(() => {
     handleRefresh();
