@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 import { styled } from '@mui/material';
-import type { TaskState, TaskRequest } from 'api-client';
+import type { TaskState } from 'api-client';
 import type { AxiosError } from 'axios';
 import React from 'react';
 import { PlacesContext, RmfIngressContext } from '../rmf-app';
@@ -22,7 +22,7 @@ export function TaskPage() {
   const { tasksApi, sioClient } = React.useContext(RmfIngressContext) || {};
   const [fetchedTasks, setFetchedTasks] = React.useState<TaskState[]>([]);
   const [updatedSummaries, setUpdatedSummaries] = React.useState<Record<string, TaskState>>({});
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(true);
+  // const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(true);
   const [page, setPage] = React.useState(0);
   const [hasMore, setHasMore] = React.useState(true);
   const places = React.useContext(PlacesContext);
@@ -144,7 +144,7 @@ export function TaskPage() {
       submitTasks={submitTasks}
       cancelTask={cancelTask}
       onRefresh={handleRefresh}
-      onAutoRefresh={setAutoRefreshEnabled}
+      // onAutoRefresh={setAutoRefreshEnabled}
     />
   );
 }

@@ -1,17 +1,5 @@
 import React from 'react';
-import {
-  Button,
-  Divider,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  PaperProps,
-  styled,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Divider, Grid, Paper, PaperProps, styled, Typography, useTheme } from '@mui/material';
 import { format } from 'date-fns';
 
 const prefix = 'task-logs';

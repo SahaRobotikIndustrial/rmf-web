@@ -156,7 +156,7 @@ export default function Dashboard(_props: {}): React.ReactElement {
                 ingestors={ingestors}
                 doorStates={Object.assign({}, doorStatesRef.current)}
                 liftStates={Object.assign({}, liftStatesRef.current)}
-                // fleetStates={Object.assign({}, fleetStatesRef.current)}
+                fleetStates={Object.assign({}, fleetStatesRef.current)}
                 mode="normal"
               ></ScheduleVisualizer>
             </Card>

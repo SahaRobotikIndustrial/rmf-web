@@ -158,7 +158,7 @@ export function RobotInfo({ robot, fetchSelectedTask }: RobotInfoProps): JSX.Ele
             disableRipple={true}
           >
             location
-            {/* {parseTaskDetail ? taskDetails.location : '-'} */}
+            {currentTask ? ` - ${parseTaskDetail(currentTask, currentTask?.category).from}` : '-'}
           </Button>
         </Grid>
         <Grid item xs={6}>
@@ -170,7 +170,7 @@ export function RobotInfo({ robot, fetchSelectedTask }: RobotInfoProps): JSX.Ele
             disableRipple={true}
           >
             destination
-            {/* {taskDetails ? taskDetails.destination : '-'} */}
+            {currentTask ? ` - ${parseTaskDetail(currentTask, currentTask?.category).to}` : '-'}
           </Button>
         </Grid>
         <Grid item xs={6}>
@@ -201,7 +201,10 @@ export function RobotInfo({ robot, fetchSelectedTask }: RobotInfoProps): JSX.Ele
           >
             time
             {currentTask?.estimate_millis
-              ? format(new Date(currentTask.estimate_millis * 1000 + Date.now()), "hh:mm aaaaa'm'")
+              ? ` - ${format(
+                  new Date(currentTask.estimate_millis * 1000 + Date.now()),
+                  "hh:mm aaaaa'm'",
+                )}`
               : '-'}
           </Button>
         </Grid>

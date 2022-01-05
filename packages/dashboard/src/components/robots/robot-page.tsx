@@ -90,7 +90,7 @@ export function RobotPage() {
     });
     setVerboseRobots(robotState);
     return resp.data;
-  }, [rmfIngress, page]);
+  }, [rmfIngress]);
 
   const fetchSelectedTask = React.useCallback(
     async (taskId: string) => {
