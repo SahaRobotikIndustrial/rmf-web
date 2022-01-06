@@ -71,7 +71,7 @@ export function RobotPanel({
   ) => {
     await handleRefresh(robot);
     setSelectedRobot(robot);
-    // onRobotZoom && onRobotZoom(robot);
+    onRobotZoom && onRobotZoom(robot);
   };
 
   return (

@@ -9,9 +9,10 @@ import {
 } from '@mui/material';
 import type { TaskState, Time } from 'api-client';
 import clsx from 'clsx';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import React from 'react';
 import { rosTimeToJs } from '../utils';
+import { getState } from './utils';
 
 const classes = {
   taskRowHover: 'task-table-taskrow-hover',
@@ -86,26 +87,13 @@ function TaskRow({ task, onClick }: TaskRowProps) {
   const [hover, setHover] = React.useState(false);
 
   const returnTaskStateCellClass = (task: TaskState) => {
-    // switch (task.) {
-    //   case RmfTaskSummary.STATE_ACTIVE:
-    //     return classes.taskActiveCell;
-    //   case RmfTaskSummary.STATE_CANCELED:
-    //     return classes.taskCancelledCell;
-    //   case RmfTaskSummary.STATE_COMPLETED:
-    //     return classes.taskCompletedCell;
-    //   case RmfTaskSummary.STATE_FAILED:
-    //     return classes.taskFailedCell;
-    //   case RmfTaskSummary.STATE_PENDING:
-    //     return classes.taskPendingCell;
-    //   case RmfTaskSummary.STATE_QUEUED:
-    //     return classes.taskQueuedCell;
-    //   default:
+    if (getState(task) === 'Underway') return classes.taskActiveCell;
+    if (getState(task) === 'Completed') return classes.taskCompletedCell;
     return classes.taskUnknownCell;
-    // }
   };
 
   const taskStateCellClass = returnTaskStateCellClass(task);
-  // TODO - replace all temp info
+  // TODO - replace robot name with something else
   return (
     <>
       <TableRow
@@ -116,9 +104,17 @@ function TaskRow({ task, onClick }: TaskRowProps) {
       >
         <TableCell>{task.booking.id}</TableCell>
         <TableCell>{'robotname'}</TableCell>
-        <TableCell>{'start time'}</TableCell>
-        <TableCell>{'end_time'}</TableCell>
-        <TableCell className={taskStateCellClass}>{'task state'}</TableCell>
+        <TableCell>
+          {task.unix_millis_start_time
+            ? format(new Date(task.unix_millis_start_time * 1000), 'dd - mm - yyyy')
+            : '-'}
+        </TableCell>
+        <TableCell>
+          {task.unix_millis_finish_time
+            ? format(new Date(task.unix_millis_finish_time * 1000), 'dd - mm - yyyy')
+            : '-'}
+        </TableCell>
+        <TableCell className={taskStateCellClass}>{task ? getState(task) : ''}</TableCell>
       </TableRow>
     </>
   );
