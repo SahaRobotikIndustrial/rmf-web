@@ -30,42 +30,59 @@ export function TaskLogs(props: TaskLogProps) {
   const phaseIds = taskLog.phases ? Object.keys(taskLog.phases) : [];
   return (
     <StyledPaper className={classes.root}>
-      <Typography variant="h6" style={{ textAlign: 'center' }} gutterBottom>
+      <Typography variant="h5" style={{ textAlign: 'center' }} gutterBottom>
         {taskLog.task_id}
       </Typography>
       <Divider />
-      {phaseIds.map((id: string) => {
-        const getEventObj: any = taskLog.phases ? taskLog.phases[id] : null;
-        const events = getEventObj ? getEventObj['events'] : {};
-        const eventIds = events ? Object.keys(events) : [];
-        return (
-          <Paper sx={{ padding: theme.spacing(1) }} key={`Phase - ${id}`}>
-            <Typography variant="body1" fontWeight="bold">
-              {`Phase - ${id}`}
-            </Typography>
-            {eventIds.map((idx) => {
-              const event = events[idx];
-              return event.map((e: any, i: any) => {
-                return (
-                  <div style={{ marginTop: theme.spacing(1) }} key={`event - ${idx}`}>
-                    <Typography variant="body1">{`${i + 1}. Event - ${idx}`}</Typography>
-                    <Grid container spacing={1}>
-                      <Grid item xs={4}>
-                        <Typography variant="body1">
-                          {format(new Date(e.unix_millis_time * 1000), "hh:mm aaaaa'm'")}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant="body1">{e.text}</Typography>
-                      </Grid>
-                    </Grid>
-                  </div>
-                );
-              });
-            })}
-          </Paper>
-        );
-      })}
+      {phaseIds.length > 0 ? (
+        phaseIds.map((id: string) => {
+          const getEventObj: any = taskLog.phases ? taskLog.phases[id] : null;
+          const events = getEventObj ? getEventObj['events'] : {};
+          const eventIds = events ? Object.keys(events) : [];
+          return (
+            <Paper sx={{ padding: theme.spacing(1) }} key={`Phase - ${id}`}>
+              <Typography variant="h6" fontWeight="bold">
+                {`Phase - ${id}`}
+              </Typography>
+              <Divider />
+              {eventIds.length > 0 ? (
+                eventIds.map((idx) => {
+                  const event = events[idx];
+                  return (
+                    <div style={{ marginTop: theme.spacing(1) }} key={`event - ${idx}`}>
+                      <Typography variant="body1" fontWeight="bold">{`Event - ${idx}`}</Typography>
+                      {event.map((e: any, i: any) => {
+                        return (
+                          <Grid container spacing={1} key={`info-${i}`}>
+                            <Grid item xs={4}>
+                              <Typography variant="body1">
+                                {format(new Date(e.unix_millis_time * 1000), "hh:mm aaaaa'm'")}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={8}>
+                              <Typography variant="body1">{e.text}</Typography>
+                            </Grid>
+                          </Grid>
+                        );
+                      })}
+                    </div>
+                  );
+                })
+              ) : (
+                <Typography align="center" sx={{ padding: theme.spacing(1) }} fontWeight="bold">
+                  No Event Logs
+                </Typography>
+              )}
+            </Paper>
+          );
+        })
+      ) : (
+        <div>
+          <Typography align="center" sx={{ padding: theme.spacing(1) }} fontWeight="bold">
+            No Logs to be shown
+          </Typography>
+        </div>
+      )}
     </StyledPaper>
   );
 }
