@@ -40,7 +40,7 @@ export function TaskLogs(props: TaskLogProps) {
           const events = getEventObj ? getEventObj['events'] : {};
           const eventIds = events ? Object.keys(events) : [];
           return (
-            <Paper sx={{ padding: theme.spacing(1) }} key={`Phase - ${id}`}>
+            <Paper sx={{ padding: theme.spacing(1) }} variant="outlined" key={`Phase - ${id}`}>
               <Typography variant="h6" fontWeight="bold">
                 {`Phase - ${id}`}
               </Typography>
@@ -49,17 +49,39 @@ export function TaskLogs(props: TaskLogProps) {
                 eventIds.map((idx) => {
                   const event = events[idx];
                   return (
-                    <div style={{ marginTop: theme.spacing(1) }} key={`event - ${idx}`}>
+                    <div
+                      style={{
+                        marginTop: theme.spacing(1),
+                        backgroundColor: theme.palette.success.light,
+                        padding: theme.spacing(1),
+                      }}
+                      key={`event - ${idx}`}
+                    >
                       <Typography variant="body1" fontWeight="bold">{`Event - ${idx}`}</Typography>
                       {event.map((e: any, i: any) => {
                         return (
-                          <Grid container spacing={1} key={`info-${i}`}>
-                            <Grid item xs={4}>
+                          <Grid
+                            container
+                            key={`info-${i}`}
+                            direction="row"
+                            justifyItems="center"
+                            sx={{ backgroundColor: 'white', marginTop: theme.spacing(1) }}
+                          >
+                            <Grid
+                              item
+                              xs={4}
+                              sx={{
+                                borderRight: `${theme.spacing(1)} solid ${
+                                  theme.palette.success.light
+                                }`,
+                                padding: theme.spacing(1),
+                              }}
+                            >
                               <Typography variant="body1">
                                 {format(new Date(e.unix_millis_time * 1000), "hh:mm aaaaa'm'")}
                               </Typography>
                             </Grid>
-                            <Grid item xs={8}>
+                            <Grid item xs={8} sx={{ padding: theme.spacing(1) }}>
                               <Typography variant="body1">{e.text}</Typography>
                             </Grid>
                           </Grid>
