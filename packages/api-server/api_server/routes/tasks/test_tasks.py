@@ -10,8 +10,10 @@ class TestTasksRoute(AppFixture):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        task_ids = [uuid4()]
+        task_ids = [uuid4(), uuid4()]
         cls.task_states = [make_task_state(task_id=f"test_{x}") for x in task_ids]
+        cls.task_states[0].status = mdl.task_state.Status.queued
+        cls.task_states[1].status = mdl.task_state.Status.completed
         cls.task_logs = [make_task_log(task_id=f"test_{x}") for x in task_ids]
 
         with cls.client.websocket_connect("/_internal") as ws:
@@ -50,6 +52,32 @@ class TestTasksRoute(AppFixture):
             )
         state = next(gen)
         self.assertEqual(task_id, state.booking.id)  # type: ignore
+
+    def test_get_active_tasks(self):
+        resp = self.client.get("/tasks/active_tasks")
+        self.assertEqual(200, resp.status_code)
+        results = resp.json()
+        self.assertEqual(1, len(results))
+        self.assertEqual(self.task_states[0].booking.id, results[0]["booking"]["id"])
+
+    def test_sub_new_tasks(self):
+        gen = self.subscribe_sio("/tasks/new_tasks")
+        new_task = make_task_state(str(uuid4()))
+        new_task.status = mdl.task_state.Status.queued
+        with self.client.websocket_connect("/_internal") as ws:
+            # an "underway" task update
+            ws.send_text(
+                mdl.TaskStateUpdate(
+                    type="task_state_update", data=self.task_states[1]
+                ).json()
+            )
+            # a new "queued" task update
+            ws.send_text(
+                mdl.TaskStateUpdate(type="task_state_update", data=new_task).json()
+            )
+        state = next(gen)
+        # should not receive the underway update
+        self.assertEqual(new_task.booking.id, state.booking.id)  # type: ignore
 
     def test_get_task_log(self):
         resp = self.client.get(

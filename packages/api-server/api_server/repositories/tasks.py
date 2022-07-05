@@ -37,6 +37,7 @@ class TaskRepository:
                 and datetime.fromtimestamp(task_state.unix_millis_start_time / 1000),
                 "unix_millis_finish_time": task_state.unix_millis_finish_time
                 and datetime.fromtimestamp(task_state.unix_millis_finish_time / 1000),
+                "status": task_state.status,
             },
             id_=task_state.booking.id,
         )

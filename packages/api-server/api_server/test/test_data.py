@@ -118,6 +118,7 @@ def make_task_state(task_id: str = "test_task") -> TaskState:
     "automatic": false
   },
   "category": "Multi-Delivery",
+  "status": "queued",
   "detail": [
     {
       "category": "Pick Up",

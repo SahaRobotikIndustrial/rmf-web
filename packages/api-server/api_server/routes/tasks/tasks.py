@@ -41,6 +41,27 @@ async def query_task_states(
     return await task_repo.query_task_states(DbTaskState.filter(**filters), pagination)
 
 
+@router.get("/active_tasks", response_model=List[mdl.TaskState])
+async def get_active_tasks(task_repo: TaskRepository = Depends(task_repo_dep)):
+    """
+    Returns all queued and underway tasks.
+    """
+    return await task_repo.query_task_states(
+        DbTaskState.filter(
+            status__in=[mdl.task_state.Status.queued, mdl.task_state.Status.underway]
+        )
+    )
+
+
+@router.sub("/new_tasks", response_model=mdl.TaskState)
+def sub_new_tasks(_req: SubscriptionRequest):
+    return task_events.task_states.pipe(
+        rxops.filter(
+            lambda x: cast(mdl.TaskState, x).status == mdl.task_state.Status.queued
+        )
+    )
+
+
 @router.get("/{task_id}/state", response_model=mdl.TaskState)
 async def get_task_state(
     task_repo: TaskRepository = Depends(task_repo_dep),
