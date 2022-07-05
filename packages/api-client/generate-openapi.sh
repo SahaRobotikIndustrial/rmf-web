@@ -48,4 +48,4 @@ npx prettier -w lib
 cat << EOF > schema/index.ts
 export default $(cat build/openapi.json)
 EOF
-npx prettier -w openapi/schema
+npx prettier -w schema

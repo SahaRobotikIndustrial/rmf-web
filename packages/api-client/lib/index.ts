@@ -111,6 +111,10 @@ export class SioClient {
   subscribeTaskLogs(taskId: string, listener: Listener<TaskEventLog>): Subscription {
     return this.subscribe<TaskEventLog>(`/tasks/${taskId}/log`, listener);
   }
+
+  subscribeNewTasks(listener: Listener<TaskState>): Subscription {
+    return this.subscribe<TaskState>('/tasks/new_tasks', listener);
+  }
 }
 
 export * from './openapi';

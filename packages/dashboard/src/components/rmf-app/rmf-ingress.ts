@@ -204,4 +204,8 @@ export class RmfIngress {
     }
     return this._taskStateObsStore[taskId];
   }
+
+  newTasksObs: Observable<TaskState> = this._convertSioToRxObs((handler) =>
+    this._sioClient.subscribeNewTasks(handler),
+  );
 }
