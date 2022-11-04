@@ -80,24 +80,7 @@ export const LMap = React.forwardRef(
           ref.current = mapInstance;
         }}
         {...otherProps}
-      >
-        <EntityManagerProvider setLeafletMap={setLeafletMap}>
-          <LabelsPortalContext.Provider value={labelsPortal}>
-            {children}
-            {otherProps.bounds && (
-              <Pane name="label" style={{ zIndex: 1000 }}>
-                <SVGOverlay
-                  attributes={{ viewBox: viewBox }}
-                  bounds={otherProps.bounds}
-                  ref={(current) => {
-                    setLabelsPortal(current?.getElement()?.ownerSVGElement || null);
-                  }}
-                />
-              </Pane>
-            )}
-          </LabelsPortalContext.Provider>
-        </EntityManagerProvider>
-      </MapContainer>
+      ></MapContainer>
     );
   },
 );

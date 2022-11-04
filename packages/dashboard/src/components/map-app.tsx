@@ -352,35 +352,6 @@ export const MapApp = styled(
               </LayersControl.BaseLayer>
             ),
           )}
-
-          <LayersControl.Overlay name="Waypoints" checked={!disabledLayers['Waypoints']}>
-            <WaypointsOverlay
-              bounds={bounds}
-              waypoints={waypoints}
-              hideLabels={disabledLayers['Waypoints']}
-            />
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay name="Dispensers" checked={!disabledLayers['Dispensers']}>
-            <WorkcellsOverlay
-              bounds={bounds}
-              workcells={dispensersData}
-              hideLabels={disabledLayers['Dispensers']}
-              onWorkcellClick={(_ev, workcell) =>
-                AppEvents.dispenserSelect.next({ guid: workcell })
-              }
-            />
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay name="Ingestors" checked={!disabledLayers['Ingestors']}>
-            <WorkcellsOverlay
-              bounds={bounds}
-              workcells={ingestorsData}
-              hideLabels={disabledLayers['Ingestors']}
-              onWorkcellClick={(_ev, workcell) => AppEvents.ingestorSelect.next({ guid: workcell })}
-            />
-          </LayersControl.Overlay>
-
           <LayersControl.Overlay name="Lifts" checked={!disabledLayers['Lifts']}>
             <LiftsOverlay
               bounds={bounds}
@@ -388,28 +359,6 @@ export const MapApp = styled(
               lifts={buildingMap.lifts}
               hideLabels={disabledLayers['Lifts']}
               onLiftClick={(_ev, lift) => AppEvents.liftSelect.next(lift)}
-            />
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay name="Doors" checked={!disabledLayers['Doors']}>
-            <DoorsOverlay
-              bounds={bounds}
-              doors={currentLevel.doors}
-              hideLabels={disabledLayers['Doors']}
-              onDoorClick={(_ev, door) => AppEvents.doorSelect.next(door)}
-            />
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay name="Trajectories" checked>
-            <TrajectoriesOverlay bounds={bounds} trajectoriesData={trajectories} />
-          </LayersControl.Overlay>
-
-          <LayersControl.Overlay name="Robots" checked={!disabledLayers['Robots']}>
-            <RobotsOverlay
-              bounds={bounds}
-              robots={robots}
-              hideLabels={disabledLayers['Robots']}
-              onRobotClick={(_ev, robot) => AppEvents.robotSelect.next([robot.fleet, robot.name])}
             />
           </LayersControl.Overlay>
         </LayersControl>
