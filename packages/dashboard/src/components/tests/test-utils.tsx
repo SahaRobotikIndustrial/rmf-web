@@ -14,7 +14,7 @@ export const superUser: UserProfile = {
   permissions: [],
 };
 
-export interface TestProivderProps {
+export interface TestProivderProps extends React.PropsWithChildren<{}> {
   profile?: UserProfile;
 }
 
@@ -39,7 +39,7 @@ export interface RenderOptions extends Omit<RenderOptions_, 'wrapper'> {
  * Helper function to wrap the render function with `TestProviders`.
  */
 export function render(ui: React.ReactElement, options?: RenderOptions) {
-  const Wrapper: React.FC = ({ children }) => (
+  const Wrapper: React.FC = ({ children }: React.PropsWithChildren<{}>) => (
     <TestProviders profile={options?.profile}>{children}</TestProviders>
   );
   return render_(ui, { wrapper: Wrapper, ...options });

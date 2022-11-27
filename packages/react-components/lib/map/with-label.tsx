@@ -30,7 +30,8 @@ export const withLabel =
     const labelsPortal = React.useContext(LabelsPortalContext);
     return (
       <g>
-        <Component {...(componentProps as P)} />
+        {/* // TODO (MH) this leaflet map is going to be removed  */}
+        {/* <Component {...(componentProps as P)} /> */}
         {!hideLabel &&
           labelsPortal &&
           ReactDOM.createPortal(
