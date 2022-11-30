@@ -25,9 +25,24 @@ import { TrajectoriesOverlay, TrajectoryData } from './trajectories-overlay';
 import { WaypointsOverlay } from './waypoints-overlay';
 import { WorkcellData, WorkcellsOverlay } from './workcells-overlay';
 import * as THREE from 'three';
-import { Canvas, useFrame, ThreeElements } from '@react-three/fiber';
+import { Canvas, useFrame, ThreeElements, useThree } from '@react-three/fiber';
 import { Box } from './Box';
 import { Wall } from './wall';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+const CameraController = () => {
+  const { camera, gl } = useThree();
+  React.useEffect(() => {
+    const controls = new OrbitControls(camera, gl.domElement);
+
+    controls.minDistance = 3;
+    controls.maxDistance = 20;
+    return () => {
+      controls.dispose();
+    };
+  }, [camera, gl]);
+  return null;
+};
 const debug = Debug('MapApp');
 
 const TrajectoryUpdateInterval = 2000;
@@ -286,6 +301,7 @@ export const MapApp = styled(
     const ready = buildingMap && currentLevel && bounds;
     return ready ? (
       <Canvas>
+        <CameraController />
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         <Box position={[-1.2, 0, 0]} />
