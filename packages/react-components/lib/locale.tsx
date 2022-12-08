@@ -9,7 +9,9 @@ export const LocaleContext = React.createContext<string | null>(null);
  * A wrapper over @mui/x-date-pickers/LocalizationProvider that detects the browser's and
  * dynamically loads the appropriate locale.
  */
-export const LocalizationProvider: React.FC = ({ children }: React.PropsWithChildren<{}>) => {
+export const LocalizationProvider: React.FC = ({
+  children,
+}: React.PropsWithChildren<{}>): JSX.Element | null => {
   const [locale, setLocale] = React.useState<Locale | null>(null);
 
   React.useEffect(() => {

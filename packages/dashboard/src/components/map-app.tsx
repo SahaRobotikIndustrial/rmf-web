@@ -29,6 +29,8 @@ import { Canvas, useFrame, ThreeElements, useThree } from '@react-three/fiber';
 import { Box } from './Box';
 import { Wall } from './wall';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Level as ThreeLevel } from './level';
+// import { Environment, OrbitControls } from "@react-three/drei";
 
 const CameraController = () => {
   const { camera, gl } = useThree();
@@ -229,6 +231,7 @@ export const MapApp = styled(
           );
         }),
       );
+
       subs.push(rmf.dispensersObs.subscribe(setDispensers));
       subs.push(rmf.ingestorsObs.subscribe(setIngestors));
       subs.push(rmf.fleetsObs.subscribe(setFleets));
@@ -299,132 +302,51 @@ export const MapApp = styled(
     const registeredLayersHandlers = React.useRef(false);
 
     const ready = buildingMap && currentLevel && bounds;
+    let minx = 999;
+    let miny = 999;
+    if (ready) {
+      const verts = buildingMap?.levels
+        .map((level) => level.wall_graph.vertices.map((vert) => vert))
+        .flat();
+      for (let index = 0; index < verts.length; index++) {
+        if (verts[index].x < minx) {
+          minx = verts[index].x;
+        }
+        if (verts[index].y < miny) {
+          miny = verts[index].y;
+        }
+      }
+    }
     return ready ? (
-      <Canvas>
+      <Canvas
+        // pixelRatio={window.devicePixelRatio}
+        camera={{
+          up: [0, 0, 1],
+          // TODO active level, x, y, elevation
+          position: [
+            buildingMap.levels[0].wall_graph.vertices[0].x,
+            buildingMap.levels[0].wall_graph.vertices[0].y,
+            0,
+          ],
+        }}
+      >
         <CameraController />
-        <ambientLight />
+        <ambientLight intensity={0.1} />
+        <pointLight intensity={1} position={[6, 0, 0]} />
+        <pointLight intensity={1} position={[-6, 0, 0]} />
+        <pointLight intensity={1} position={[0, 6, 0]} />
+        <pointLight intensity={1} position={[0, -6, 0]} />
+        <pointLight intensity={1} position={[0, 0, 6]} />
+        <pointLight intensity={1} position={[0, 0, -6]} />
         <pointLight position={[10, 10, 10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Box position={[1.2, 0, 0]} />
-        <Wall walls={buildingMap.levels[0].wall_graph}></Wall>
+        <ThreeLevel
+          level={buildingMap.levels[0]}
+          minx={minx}
+          miny={miny}
+          selected={true}
+        ></ThreeLevel>
       </Canvas>
-    ) : // <LMap
-    //   ref={(cur) => {
-    //     if (registeredLayersHandlers.current || !cur) return;
-    //     cur.leafletElement.on('overlayadd', (ev: L.LayersControlEvent) =>
-    //       setDisabledLayers((prev) => ({ ...prev, [ev.name]: false })),
-    //     );
-    //     cur.leafletElement.on('overlayremove', (ev: L.LayersControlEvent) =>
-    //       setDisabledLayers((prev) => ({ ...prev, [ev.name]: true })),
-    //     );
-    //     registeredLayersHandlers.current = true;
-    //   }}
-    //   attributionControl={false}
-    //   zoomDelta={0.5}
-    //   zoomSnap={0.5}
-    //   center={[(bounds[1][0] - bounds[0][0]) / 2, (bounds[1][1] - bounds[0][1]) / 2]}
-    //   zoom={6}
-    //   bounds={bounds}
-    //   maxBounds={bounds}
-    // >
-    //   <AttributionControl position="bottomright" prefix="OSRC-SG" />
-    //   <LayersControl
-    //     position="topleft"
-    //     onbaselayerchange={(ev) =>
-    //       setCurrentLevel(
-    //         buildingMap.levels.find((l) => l.name === ev.name) || buildingMap.levels[0],
-    //       )
-    //     }
-    //   >
-    //     <Pane name="image" style={{ zIndex: 0 }} />
-    //     {buildingMap.levels.map((level) => (
-    //       <LayersControl.BaseLayer
-    //         key={level.name}
-    //         name={level.name}
-    //         checked={currentLevel === level}
-    //       >
-    //         {currentLevel.images.length > 0 && image && (
-    //           <ImageOverlay bounds={bounds} url={image} pane="image" />
-    //         )}
-    //       </LayersControl.BaseLayer>
-    //     ))}
-
-    //     <LayersControl.Overlay name="Waypoints" checked={!disabledLayers['Waypoints']}>
-    //       <WaypointsOverlay
-    //         bounds={bounds}
-    //         waypoints={waypoints}
-    //         hideLabels={disabledLayers['Waypoints']}
-    //       />
-    //     </LayersControl.Overlay>
-
-    //     <LayersControl.Overlay name="Dispensers" checked={!disabledLayers['Dispensers']}>
-    //       <WorkcellsOverlay
-    //         bounds={bounds}
-    //         workcells={dispensersData}
-    //         hideLabels={disabledLayers['Dispensers']}
-    //         onWorkcellClick={(_ev, workcell) =>
-    //           AppEvents.dispenserSelect.next({ guid: workcell })
-    //         }
-    //       />
-    //     </LayersControl.Overlay>
-
-    //     <LayersControl.Overlay name="Ingestors" checked={!disabledLayers['Ingestors']}>
-    //       <WorkcellsOverlay
-    //         bounds={bounds}
-    //         workcells={ingestorsData}
-    //         hideLabels={disabledLayers['Ingestors']}
-    //         onWorkcellClick={(_ev, workcell) => AppEvents.ingestorSelect.next({ guid: workcell })}
-    //       />
-    //     </LayersControl.Overlay>
-
-    //     <LayersControl.Overlay name="Lifts" checked={!disabledLayers['Lifts']}>
-    //       <LiftsOverlay
-    //         bounds={bounds}
-    //         currentLevel={currentLevel.name}
-    //         lifts={buildingMap.lifts}
-    //         hideLabels={disabledLayers['Lifts']}
-    //         onLiftClick={(_ev, lift) => AppEvents.liftSelect.next(lift)}
-    //       />
-    //     </LayersControl.Overlay>
-
-    //     <LayersControl.Overlay name="Doors" checked={!disabledLayers['Doors']}>
-    //       <DoorsOverlay
-    //         bounds={bounds}
-    //         doors={currentLevel.doors}
-    //         hideLabels={disabledLayers['Doors']}
-    //         onDoorClick={(_ev, door) => AppEvents.doorSelect.next(door)}
-    //       />
-    //     </LayersControl.Overlay>
-
-    //     <LayersControl.Overlay name="Trajectories" checked>
-    //       <TrajectoriesOverlay bounds={bounds} trajectoriesData={trajectories} />
-    //     </LayersControl.Overlay>
-
-    //     <LayersControl.Overlay name="Robots" checked={!disabledLayers['Robots']}>
-    //       <RobotsOverlay
-    //         bounds={bounds}
-    //         robots={robots}
-    //         hideLabels={disabledLayers['Robots']}
-    //         onRobotClick={(_ev, robot) => AppEvents.robotSelect.next([robot.fleet, robot.name])}
-    //       />
-    //     </LayersControl.Overlay>
-    //   </LayersControl>
-
-    //   <TrajectoryTimeControl
-    //     position="topleft"
-    //     value={trajectoryTime}
-    //     min={60000}
-    //     max={600000}
-    //     onChange={(_ev, newValue) =>
-    //       setMapSettings((prev) => {
-    //         const newSettings = { ...prev, trajectoryTime: newValue };
-    //         window.localStorage.setItem(SettingsKey, JSON.stringify(newSettings));
-    //         return newSettings;
-    //       })
-    //     }
-    //   />
-    // </LMap>
-    null;
+    ) : null;
   }),
 )({
   // This ensures that the resize handle is above the map.
