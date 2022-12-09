@@ -49,15 +49,15 @@ class TaskRepository:
         self, query: QuerySet[DbTaskState], pagination: Optional[Pagination] = None
     ) -> List[TaskState]:
         try:
-            if pagination:
-                query = add_pagination(query, pagination)
+            # if pagination:
+            #     query = add_pagination(query, pagination)
             # TODO: enforce with authz
             results = await query.values_list("data", flat=True)
-            # for r in results:
-            #     fresh_state = TaskState(**r)
-            #     await self.save_task_state(fresh_state)
-            #     print('saved a task state')
-            # print('doneeee')
+            for r in results:
+                fresh_state = TaskState(**r)
+                await self.save_task_state(fresh_state)
+                print("saved a task state")
+            print("done")
 
             return [TaskState(**r) for r in results]
         except FieldError as e:
