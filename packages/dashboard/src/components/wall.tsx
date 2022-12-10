@@ -7,7 +7,6 @@ import { GraphNode } from 'rmf-models';
 import { Box } from './Box';
 import { WallShapeSegment } from './wall-segment';
 import { LineSegments } from 'three';
-import { LineE } from './line';
 export interface WallProps {
   walls: Graph;
   opacity: number;
@@ -127,7 +126,7 @@ export function Wall({ walls }: WallProps, props: ThreeElements['mesh']) {
     ))} */}
       {walls_.map((wall, i) => (
         <Box
-          key={9}
+          key={i}
           rot={walls_[i].rot}
           size={[walls_[i].width, walls_[i].depth, walls_[i].height]}
           position={[walls_[i].position[0], walls_[i].position[1], walls_[i].position[2]]}
