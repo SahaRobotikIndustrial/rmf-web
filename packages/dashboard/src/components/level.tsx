@@ -23,10 +23,10 @@ export function Level({ level, selected, minx, miny }: LevelProps, props: ThreeE
   return (
     <>
       {level.wall_graph.edges.length > 0 ? (
-        <Wall opacity={Number(selected)} walls={level.wall_graph}></Wall>
+        <Wall key={1} opacity={Number(selected)} walls={level.wall_graph}></Wall>
       ) : null}
       {level.doors.map((door, i) => (
-        <DoorVisual opacity={Number(selected)} door={door} />
+        <DoorVisual key={i} opacity={Number(selected)} door={door} />
       ))}
     </>
   );
