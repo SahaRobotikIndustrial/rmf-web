@@ -685,7 +685,7 @@ function defaultTask(): TaskRequest {
   return {
     category: 'patrol',
     description: defaultLoopTask(),
-    unix_millis_earliest_start_time: Date.now(),
+    unix_millis_earliest_start_time: 0,
     unix_millis_request_time: Date.now(),
     priority: { type: 'binary', value: 0 },
     requester: '',
