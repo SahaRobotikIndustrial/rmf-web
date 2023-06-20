@@ -26,8 +26,9 @@ import {
 } from '@mui/material';
 import {
   ApiServerModelsTortoiseModelsAlertsAlertLeaf as Alert,
-  TaskRequest,
+  PostScheduledTaskRequest,
   TaskFavoritePydantic as TaskFavorite,
+  TaskRequest,
 } from 'api-client';
 import React from 'react';
 import {
@@ -38,6 +39,7 @@ import {
   HeaderBar,
   LogoButton,
   NavigationBar,
+  Schedule,
   useAsync,
 } from 'react-components';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -58,9 +60,9 @@ import {
   ResourcesContext,
   SettingsContext,
 } from './app-contexts';
+import { AppEvents } from './app-events';
 import { RmfAppContext } from './rmf-app';
 import { parseTasksFile } from './tasks/utils';
-import { AppEvents } from './app-events';
 import { Subscription } from 'rxjs';
 import { formatDistance } from 'date-fns';
 
@@ -114,6 +116,27 @@ function AppSettings() {
       </RadioGroup>
     </FormControl>
   );
+}
+
+function toApiSchedule(taskRequest: TaskRequest, schedule: Schedule): PostScheduledTaskRequest {
+  const start = schedule.startOn;
+  const apiSchedules: PostScheduledTaskRequest['schedules'] = [];
+  const date = new Date(start);
+  const start_from = start.toISOString();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const at = `${hours}:${minutes}`;
+  schedule.days[0] && apiSchedules.push({ period: 'monday', start_from, at });
+  schedule.days[1] && apiSchedules.push({ period: 'tuesday', start_from, at });
+  schedule.days[2] && apiSchedules.push({ period: 'wednesday', start_from, at });
+  schedule.days[3] && apiSchedules.push({ period: 'thursday', start_from, at });
+  schedule.days[4] && apiSchedules.push({ period: 'friday', start_from, at });
+  schedule.days[5] && apiSchedules.push({ period: 'saturday', start_from, at });
+  schedule.days[6] && apiSchedules.push({ period: 'sunday', start_from, at });
+  return {
+    task_request: taskRequest,
+    schedules: apiSchedules,
+  };
 }
 
 export interface AppBarProps {
@@ -226,18 +249,26 @@ export const AppBar = React.memo(({ extraToolbarItems }: AppBarProps): React.Rea
   }, [rmf]);
 
   const submitTasks = React.useCallback<Required<CreateTaskFormProps>['submitTasks']>(
-    async (taskRequests) => {
+    async (taskRequests, schedule) => {
       if (!rmf) {
         throw new Error('tasks api not available');
       }
-      await Promise.all(
-        taskRequests.map((taskReq) =>
-          rmf.tasksApi.postDispatchTaskTasksDispatchTaskPost({
-            type: 'dispatch_task_request',
-            request: taskReq,
-          }),
-        ),
-      );
+      if (!schedule) {
+        await Promise.all(
+          taskRequests.map((request) =>
+            rmf.tasksApi.postDispatchTaskTasksDispatchTaskPost({
+              type: 'dispatch_task_request',
+              request,
+            }),
+          ),
+        );
+      } else {
+        const scheduleRequests = taskRequests.map((req) => toApiSchedule(req, schedule));
+        const resps = await Promise.all(
+          scheduleRequests.map((req) => rmf.tasksApi.postScheduledTaskScheduledTasksPost(req)),
+        );
+        AppEvents.newScheduleSubmitted.next(resps.map((resp) => resp.data.id));
+      }
       AppEvents.refreshTaskQueueTableCount.next(refreshTaskQueueTableCount + 1);
     },
     [rmf, refreshTaskQueueTableCount],
