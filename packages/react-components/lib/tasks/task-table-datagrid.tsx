@@ -105,6 +105,42 @@ export function TaskDataGridTable({
 
   const columns: GridColDef[] = [
     {
+      field: 'unix_millis_request_time',
+      headerName: 'Date',
+      width: 150,
+      editable: false,
+      renderCell: (cellValues) => {
+        return (
+          <TextField
+            variant="standard"
+            value={
+              cellValues.row.booking.unix_millis_request_time
+                ? `${new Date(
+                    cellValues.row.booking.unix_millis_request_time,
+                  ).toLocaleDateString()}`
+                : 'N/A'
+            }
+            InputProps={{ disableUnderline: true }}
+            multiline
+          />
+        );
+      },
+      flex: 1,
+      filterOperators: getMinimalDateOperators,
+      filterable: true,
+    },
+    {
+      field: 'requester',
+      headerName: 'Requester',
+      width: 150,
+      editable: false,
+      valueGetter: (params: GridValueGetterParams) =>
+        params.row.booking.requester ? params.row.booking.requester : 'N/A',
+      flex: 1,
+      filterOperators: getMinimalStringFilterOperators,
+      filterable: true,
+    },
+    {
       field: 'id_',
       headerName: 'ID',
       width: 90,
@@ -119,7 +155,7 @@ export function TaskDataGridTable({
       width: 150,
       editable: false,
       valueGetter: (params: GridValueGetterParams) =>
-        params.row.category ? params.row.category : 'unknown',
+        params.row.category ? params.row.category : 'N/A',
       flex: 1,
       filterOperators: getMinimalStringFilterOperators,
       filterable: true,
@@ -130,7 +166,7 @@ export function TaskDataGridTable({
       width: 150,
       editable: false,
       valueGetter: (params: GridValueGetterParams) =>
-        params.row.assigned_to ? params.row.assigned_to.name : 'unknown',
+        params.row.assigned_to ? params.row.assigned_to.name : 'N/A',
       flex: 1,
       filterOperators: getMinimalStringFilterOperators,
       filterable: true,
@@ -151,7 +187,7 @@ export function TaskDataGridTable({
                   ).toLocaleDateString()} ${new Date(
                     cellValues.row.unix_millis_start_time,
                   ).toLocaleTimeString()}`
-                : 'unknown'
+                : 'N/A'
             }
             InputProps={{ disableUnderline: true }}
             multiline
@@ -178,7 +214,7 @@ export function TaskDataGridTable({
                   ).toLocaleDateString()} ${new Date(
                     cellValues.row.unix_millis_finish_time,
                   ).toLocaleTimeString()}`
-                : 'unknown'
+                : 'N/A'
             }
             InputProps={{ disableUnderline: true }}
             multiline
@@ -194,7 +230,7 @@ export function TaskDataGridTable({
       headerName: 'State',
       editable: false,
       valueGetter: (params: GridValueGetterParams) =>
-        params.row.status ? params.row.status : 'unknown',
+        params.row.status ? params.row.status : 'N/A',
       flex: 1,
       filterOperators: getMinimalStringFilterOperators,
       filterable: true,
