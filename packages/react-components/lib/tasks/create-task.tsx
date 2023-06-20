@@ -684,7 +684,7 @@ function defaultTaskDescription(taskCategory: string): TaskDescription | undefin
 function defaultTask(): TaskRequest {
   return {
     category: 'patrol',
-    description: defaultLoopsTask(),
+    description: defaultLoopTask(),
     unix_millis_earliest_start_time: Date.now(),
     unix_millis_request_time: Date.now(),
     priority: { type: 'binary', value: 0 },
