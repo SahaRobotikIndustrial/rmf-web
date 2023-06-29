@@ -46,7 +46,7 @@
     "@mui/material": "^5.8.3",
     "@mui/styles": "^5.8.3",
     "@mui/system": "^5.8.3",
-    "@react-three/drei": "7.27.5",
+    "@react-three/drei": "7.5.1",
     "@react-three/fiber": "7.0.29",
     "@types/debug": "^4.1.5",
     "@types/leaflet": "^1.5.17",
