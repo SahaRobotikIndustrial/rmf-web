@@ -49,7 +49,12 @@ export function TaskLogs({ taskLog, taskState, title }: TaskLogProps) {
   }
 
   return (
-    <Box>
+    /**
+     * Fix
+     * TS Expression produces a union type that is too complex to represent with Material-UI and @react-three/fiber
+     * https://stackoverflow.com/questions/68692230/ts-expression-produces-a-union-type-that-is-too-complex-to-represent-with-materi
+     */
+    <Box component="div">
       <Typography variant="h6" style={{ textAlign: 'center' }} gutterBottom>
         {taskState && (title ? title : taskState.booking.id)}
       </Typography>
