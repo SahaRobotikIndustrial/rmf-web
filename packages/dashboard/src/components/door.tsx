@@ -42,17 +42,16 @@ function SingleSwingDoor({
   const thickness = 0.5;
   const v = new THREE.Vector3(v1_x - v2_x, 0, v1_y - v2_y);
   v.normalize();
+  const angle = Math.atan2(v1_y - v2_y, v1_x - v2_x) - Math.PI / 2;
+  const rot = new THREE.Euler(0, 0, angle);
   let z = v.angleTo(new THREE.Vector3(0, 0, 1));
-  // console.log("Before assigning")
-  // console.log(z);
+
   if (doorState === 1) {
     z += 1;
   } else if (doorState === 2) {
     z += 3;
   }
-  // console.log("After assigning")
-  // console.log(z);
-  const rot = new THREE.Euler(0, 0, z);
+
   const pos = midPoint(v1_x, v1_y, v2_x, v2_y).concat(height / 2 + elevation);
   const dist = distance(v1_x, v1_y, v2_x, v2_y);
   return (
