@@ -7,7 +7,7 @@ export interface ImageThreeProps {
   imageUrl: string;
 }
 
-export const ImageThree = ({ level, imageUrl }: ImageThreeProps) => {
+export const ReactThreeFiberImageMaker = ({ level, imageUrl }: ImageThreeProps) => {
   const texture = useLoader(TextureLoader, imageUrl);
   const image = level.images[0];
   const scale = image.scale;

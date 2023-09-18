@@ -40,7 +40,7 @@ import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls, Line } from '@react-three/drei';
 import { LayersController } from './three-fiber';
-import { Lifts, Door, RobotThree, ImageThree } from './three-fiber';
+import { Lifts, Door, RobotThree, ReactThreeFiberImageMaker } from './three-fiber';
 
 type FleetState = ApiServerModelsRmfApiFleetStateFleetState;
 
@@ -600,7 +600,9 @@ export const MapApp = styled(
                 elevation={currentLevel.elevation}
               />
             ))}
-          {imageUrl && <ImageThree level={currentLevel} imageUrl={imageUrl} />}
+          {currentLevel.images.length > 0 && imageUrl && (
+            <ReactThreeFiberImageMaker level={currentLevel} imageUrl={imageUrl} />
+          )}
           {!disabledLayers['Doors'] &&
             buildingMap.lifts.length &&
             buildingMap.lifts.map((lift, i) =>
