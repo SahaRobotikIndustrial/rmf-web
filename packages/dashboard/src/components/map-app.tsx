@@ -21,6 +21,7 @@ import {
   WallMaker,
   findSceneBoundingBoxFromThreeFiber,
   ShapeThreeRendering,
+  ReactThreeFiberImageMaker,
 } from 'react-components';
 import { AttributionControl, ImageOverlay, LayersControl, Pane, Viewport } from 'react-leaflet';
 import { EMPTY, merge, scan, Subscription, switchMap } from 'rxjs';
@@ -40,7 +41,7 @@ import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls, Line } from '@react-three/drei';
 import { LayersController } from './three-fiber';
-import { Lifts, Door, RobotThree, ReactThreeFiberImageMaker } from './three-fiber';
+import { Lifts, Door, RobotThree } from './three-fiber';
 
 type FleetState = ApiServerModelsRmfApiFleetStateFleetState;
 
