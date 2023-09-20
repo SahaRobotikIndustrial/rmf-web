@@ -67,7 +67,15 @@ interface CleanTaskDescription {
   zone: string;
 }
 
-type TaskDescription = DeliveryTaskDescription | PatrolTaskDescription | CleanTaskDescription;
+interface CustomTaskDescription {
+  activities: Object;
+}
+
+type TaskDescription =
+  | DeliveryTaskDescription
+  | PatrolTaskDescription
+  | CleanTaskDescription
+  | CustomTaskDescription;
 
 const isNonEmptyString = (value: string): boolean => value.length > 0;
 const isPositiveNumber = (value: number): boolean => value > 0;
@@ -99,6 +107,16 @@ const isPatrolTaskDescriptionValid = (taskDescription: PatrolTaskDescription): b
 
 const isCleanTaskDescriptionValid = (taskDescription: CleanTaskDescription): boolean => {
   return taskDescription.zone.length !== 0;
+};
+
+const isCustomTaskDescriptionValid = (taskDescription: CustomTaskDescription): boolean => {
+  return Object.keys(taskDescription.activities).length !== 0;
+  // try {
+  //   JSON.parse(taskDescription.activities);
+  // } catch {
+  //   return false;
+  // }
+  // return true;
 };
 
 const classes = {
@@ -139,6 +157,9 @@ function getShortDescription(taskRequest: TaskRequest): string {
     }
     case 'patrol': {
       return `[Patrol] [${taskRequest.description.places[0]}] to [${taskRequest.description.places[1]}]`;
+    }
+    case 'custom': {
+      return `[Custom] task`;
     }
     default:
       return `[Unknown] type "${taskRequest.category}"`;
@@ -470,6 +491,52 @@ function CleanTaskForm({ taskDesc, cleaningZones, onChange, allowSubmit }: Clean
   );
 }
 
+interface CustomTaskFormProps {
+  taskDesc: CustomTaskDescription;
+  onChange(customTaskDescription: CustomTaskDescription): void;
+  allowSubmit(allow: boolean): void;
+}
+
+function CustomTaskForm({ taskDesc, onChange, allowSubmit }: CustomTaskFormProps) {
+  const onInputChange = (desc: CustomTaskDescription) => {
+    allowSubmit(isCustomTaskDescriptionValid(desc));
+    onChange(desc);
+  };
+  const placeholder = `[
+  {
+    "category": "perform_action",
+    "description": {
+      "unix_millis_action_duration_estimate": 60000,
+      "category": "example",
+      "description": { ... }
+    }
+  },
+  {...},
+  {...}
+]`;
+
+  return (
+    <TextField
+      id="outlined-multiline-static"
+      fullWidth
+      label="Activities"
+      multiline
+      rows={6}
+      placeholder={placeholder}
+      helperText={'List of JSON task descriptions delimited by commas'}
+      onChange={(ev) => {
+        try {
+          const activities: Object = JSON.parse((ev.target as HTMLInputElement).value);
+          onInputChange({ activities });
+        } catch {
+          return;
+        }
+      }}
+      required
+    />
+  );
+}
+
 interface FavoriteTaskProps {
   listItemText: string;
   listItemClick: () => void;
@@ -566,6 +633,12 @@ function defaultDeliveryTask(): DeliveryTaskDescription {
   };
 }
 
+function defaultCustomTask(): CustomTaskDescription {
+  return {
+    activities: [],
+  };
+}
+
 function defaultTaskDescription(taskCategory: string): TaskDescription | undefined {
   switch (taskCategory) {
     case 'clean':
@@ -574,6 +647,8 @@ function defaultTaskDescription(taskCategory: string): TaskDescription | undefin
       return defaultPatrolTask();
     case 'delivery':
       return defaultDeliveryTask();
+    case 'custom':
+      return defaultCustomTask();
     default:
       return undefined;
   }
@@ -811,6 +886,14 @@ export function CreateTaskForm({
             allowSubmit={allowSubmit}
           />
         );
+      case 'custom':
+        return (
+          <CustomTaskForm
+            taskDesc={taskRequest.description as CustomTaskDescription}
+            onChange={(desc) => handleTaskDescriptionChange('custom', desc)}
+            allowSubmit={allowSubmit}
+          />
+        );
       default:
         return null;
     }
@@ -1034,6 +1117,9 @@ export function CreateTaskForm({
                         }
                       >
                         Delivery
+                      </MenuItem>
+                      <MenuItem value="custom" disabled={false}>
+                        Custom
                       </MenuItem>
                     </TextField>
                   </Grid>
